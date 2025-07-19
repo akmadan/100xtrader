@@ -1,0 +1,4 @@
+db_driver: sqlite3
+db_source: trader.db
+server_port: ":8080"
+log_level: info 

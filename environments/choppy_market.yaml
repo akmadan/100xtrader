@@ -1,0 +1,16 @@
+id: choppy_market
+name: Choppy Market
+description: Range-bound trading, fake breakouts, whipsaw movements
+volatility: medium
+trend: sideways
+liquidity: high
+agents:
+  - type: scalper
+    count: 3
+    aggressiveness: medium
+  - type: range_trader
+    count: 2
+    aggressiveness: low
+events:
+  - type: whipsaw
+    frequency: random

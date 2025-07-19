@@ -1,0 +1,16 @@
+id: bull_market_2021
+name: Bull Market 2021
+description: Low volatility, strong uptrend, aggressive buying agents
+volatility: low
+trend: up
+liquidity: high
+agents:
+  - type: momentum_chaser
+    count: 5
+    aggressiveness: high
+  - type: dip_buyer
+    count: 3
+    aggressiveness: medium
+events:
+  - type: earnings
+    frequency: weekly 

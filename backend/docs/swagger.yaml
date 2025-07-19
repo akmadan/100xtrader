@@ -1,0 +1,383 @@
+basePath: /
+definitions:
+  dto.EnvironmentListItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      liquidity:
+        type: string
+      name:
+        type: string
+      trend:
+        type: string
+      volatility:
+        type: string
+    type: object
+  dto.EnvironmentListResponse:
+    properties:
+      environments:
+        items:
+          $ref: '#/definitions/dto.EnvironmentListItem'
+        type: array
+    type: object
+  dto.OrderCreateRequest:
+    properties:
+      price:
+        type: number
+      quantity:
+        type: number
+      side:
+        enum:
+        - buy
+        - sell
+        type: string
+      symbol:
+        type: string
+      type:
+        enum:
+        - market
+        - limit
+        - stop
+        type: string
+      user:
+        type: string
+    required:
+    - price
+    - quantity
+    - side
+    - symbol
+    - type
+    - user
+    type: object
+  dto.OrderResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      quantity:
+        type: number
+      side:
+        type: string
+      status:
+        type: string
+      symbol:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+      user:
+        type: string
+    type: object
+  dto.PortfolioResponse:
+    properties:
+      cash_balance:
+        type: number
+      pnl:
+        type: number
+      positions:
+        items:
+          $ref: '#/definitions/dto.PositionResponse'
+        type: array
+      total_value:
+        type: number
+      user:
+        type: string
+    type: object
+  dto.PositionResponse:
+    properties:
+      average_price:
+        type: number
+      market_value:
+        type: number
+      pnl:
+        type: number
+      quantity:
+        type: number
+      symbol:
+        type: string
+    type: object
+  dto.PositionsListResponse:
+    properties:
+      positions:
+        items:
+          $ref: '#/definitions/dto.PositionResponse'
+        type: array
+    type: object
+  dto.StartEnvironmentResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  dto.TradeResponse:
+    properties:
+      id:
+        type: integer
+      price:
+        type: number
+      quantity:
+        type: number
+      side:
+        type: string
+      symbol:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  dto.TradesListResponse:
+    properties:
+      trades:
+        items:
+          $ref: '#/definitions/dto.TradeResponse'
+        type: array
+    type: object
+info:
+  contact: {}
+  description: Local Trading Simulation Platform API
+  title: 100xtrader API
+  version: "1.0"
+paths:
+  /environments:
+    get:
+      description: Returns all available trading environments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all trading environments
+      tags:
+      - environments
+  /environments/{id}/start:
+    post:
+      description: Starts a trading environment by ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.StartEnvironmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start a trading environment
+      tags:
+      - environments
+  /orders:
+    get:
+      description: Returns all orders (optionally filter by user)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.OrderResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Places a new order (market, limit, or stop)
+      parameters:
+      - description: Order create request
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrderCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{id}:
+    delete:
+      description: Deletes an order by ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an order
+      tags:
+      - orders
+  /portfolio:
+    get:
+      description: Returns portfolio summary for a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PortfolioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user portfolio
+      tags:
+      - portfolio
+  /positions:
+    get:
+      description: Returns all open positions for a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PositionsListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user positions
+      tags:
+      - portfolio
+  /trades:
+    get:
+      description: Returns trade history for a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TradesListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user trade history
+      tags:
+      - portfolio
+swagger: "2.0"
