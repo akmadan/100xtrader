@@ -22,6 +22,58 @@ definitions:
           $ref: '#/definitions/dto.EnvironmentListItem'
         type: array
     type: object
+  dto.MarketDataResponse:
+    properties:
+      last_price:
+        type: number
+      last_trade_time:
+        type: string
+      ohlc:
+        $ref: '#/definitions/dto.OHLCResponse'
+      recent_trades:
+        items:
+          $ref: '#/definitions/dto.TradeTickResponse'
+        type: array
+      symbol:
+        type: string
+    type: object
+  dto.OHLCResponse:
+    properties:
+      close:
+        type: number
+      high:
+        type: number
+      low:
+        type: number
+      open:
+        type: number
+      start:
+        type: string
+      volume:
+        type: number
+    type: object
+  dto.OrderBookLevel:
+    properties:
+      price:
+        type: number
+      quantity:
+        type: number
+    type: object
+  dto.OrderBookResponse:
+    properties:
+      asks:
+        items:
+          $ref: '#/definitions/dto.OrderBookLevel'
+        type: array
+      bids:
+        items:
+          $ref: '#/definitions/dto.OrderBookLevel'
+        type: array
+      symbol:
+        type: string
+      time:
+        type: string
+    type: object
   dto.OrderCreateRequest:
     properties:
       price:
@@ -129,6 +181,17 @@ definitions:
       timestamp:
         type: string
     type: object
+  dto.TradeTickResponse:
+    properties:
+      price:
+        type: number
+      quantity:
+        type: number
+      side:
+        type: string
+      timestamp:
+        type: string
+    type: object
   dto.TradesListResponse:
     properties:
       trades:
@@ -196,6 +259,57 @@ paths:
       summary: Start a trading environment
       tags:
       - environments
+  /market-data/{symbol}:
+    get:
+      description: Returns the latest price, OHLC, volume, and recent trades for a
+        symbol
+      parameters:
+      - description: Symbol
+        in: path
+        name: symbol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MarketDataResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get market data for a symbol
+      tags:
+      - market
+  /orderbook/{symbol}:
+    get:
+      description: Returns the current order book (bids/asks) for a symbol
+      parameters:
+      - description: Symbol
+        in: path
+        name: symbol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.OrderBookResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get order book for a symbol
+      tags:
+      - market
   /orders:
     get:
       description: Returns all orders (optionally filter by user)

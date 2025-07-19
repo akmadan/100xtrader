@@ -12,6 +12,8 @@ type Order struct {
 	Quantity  float64   `db:"quantity"`
 	Price     float64   `db:"price"`
 	Status    string    `db:"status"`
+	SessionID string    `db:"session_id"`
+	Source    string    `db:"source"` // user or ai
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
@@ -24,6 +26,8 @@ type Trade struct {
 	Symbol      string    `db:"symbol"`
 	Quantity    float64   `db:"quantity"`
 	Price       float64   `db:"price"`
+	SessionID   string    `db:"session_id"`
+	Source      string    `db:"source"` // user or ai
 	Timestamp   time.Time `db:"timestamp"`
 }
 
@@ -41,4 +45,24 @@ type Environment struct {
 	ID          string `db:"id"`
 	Name        string `db:"name"`
 	Description string `db:"description"`
+	Volatility  string `db:"volatility"`
+	Trend       string `db:"trend"`
+	Liquidity   string `db:"liquidity"`
+	// Add more fields as needed (e.g., session, timezone, etc.)
+}
+
+// Ticker represents a tradable symbol
+type Ticker struct {
+	Symbol string `db:"symbol"`
+	Name   string `db:"name"`
+}
+
+// Session represents a trading session
+type Session struct {
+	ID          string    `db:"id"`
+	User        string    `db:"user"`
+	Environment string    `db:"environment"`
+	Ticker      string    `db:"ticker"`
+	StartedAt   time.Time `db:"started_at"`
+	EndedAt     time.Time `db:"ended_at"`
 }

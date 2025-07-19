@@ -67,6 +67,8 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		Quantity:  req.Quantity,
 		Price:     req.Price,
 		Status:    "open",
+		SessionID: req.SessionID,
+		Source:    req.Source,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
@@ -91,6 +93,8 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	}
 
 	for _, trade := range trades {
+		trade.SessionID = order.SessionID
+		trade.Source = order.Source
 		if err := h.TradeRepo.RecordTrade(context.Background(), trade); err != nil {
 			utils.Logger.WithError(err).Error("failed to record trade")
 		}
@@ -115,6 +119,8 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 			// Process triggered stop order as a market order
 			stopTrades := engine.GetOrderBookManager().AddMarketOrderAndMatch(stopOrder)
 			for _, stopTrade := range stopTrades {
+				stopTrade.SessionID = order.SessionID
+				stopTrade.Source = order.Source
 				if err := h.TradeRepo.RecordTrade(context.Background(), stopTrade); err != nil {
 					utils.Logger.WithError(err).Error("failed to record triggered stop trade")
 				}

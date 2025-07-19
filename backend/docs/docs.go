@@ -97,6 +97,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/market-data/{symbol}": {
+            "get": {
+                "description": "Returns the latest price, OHLC, volume, and recent trades for a symbol",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "market"
+                ],
+                "summary": "Get market data for a symbol",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Symbol",
+                        "name": "symbol",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MarketDataResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orderbook/{symbol}": {
+            "get": {
+                "description": "Returns the current order book (bids/asks) for a symbol",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "market"
+                ],
+                "summary": "Get order book for a symbol",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Symbol",
+                        "name": "symbol",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.OrderBookResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/orders": {
             "get": {
                 "description": "Returns all orders (optionally filter by user)",
@@ -412,6 +488,86 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.MarketDataResponse": {
+            "type": "object",
+            "properties": {
+                "last_price": {
+                    "type": "number"
+                },
+                "last_trade_time": {
+                    "type": "string"
+                },
+                "ohlc": {
+                    "$ref": "#/definitions/dto.OHLCResponse"
+                },
+                "recent_trades": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TradeTickResponse"
+                    }
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OHLCResponse": {
+            "type": "object",
+            "properties": {
+                "close": {
+                    "type": "number"
+                },
+                "high": {
+                    "type": "number"
+                },
+                "low": {
+                    "type": "number"
+                },
+                "open": {
+                    "type": "number"
+                },
+                "start": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.OrderBookLevel": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.OrderBookResponse": {
+            "type": "object",
+            "properties": {
+                "asks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderBookLevel"
+                    }
+                },
+                "bids": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderBookLevel"
+                    }
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.OrderCreateRequest": {
             "type": "object",
             "required": [
@@ -565,6 +721,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "symbol": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.TradeTickResponse": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "side": {
                     "type": "string"
                 },
                 "timestamp": {

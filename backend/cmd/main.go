@@ -11,6 +11,7 @@ import (
 	"github.com/akshitmadan/100xtrader/backend/internal/config"
 	"github.com/akshitmadan/100xtrader/backend/internal/data"
 	"github.com/akshitmadan/100xtrader/backend/internal/data/repos"
+	"github.com/akshitmadan/100xtrader/backend/internal/engine"
 	"github.com/akshitmadan/100xtrader/backend/internal/utils"
 	"github.com/gin-gonic/gin"
 
@@ -23,6 +24,7 @@ import (
 func main() {
 	utils.InitLogger()
 	config.LoadConfig("../../")
+
 	db := data.InitDB(config.AppConfig.DBSource)
 	data.RunMigrations(db, "migrations/001_init.sql")
 
@@ -33,8 +35,10 @@ func main() {
 	})
 
 	// Wire up environment repository and handler
-	envRepo := repos.NewEnvironmentRepository("../../environments")
-	envHandler := api.NewEnvironmentHandler(envRepo)
+	envRepo := repos.NewEnvironmentRepository(db)
+	envMgr := engine.GetEnvironmentManager(envRepo)
+	envHandler := api.NewEnvironmentHandler(envRepo, envMgr)
+	// Register all environment routes with the unified handler
 	api.RegisterEnvironmentRoutes(r, envHandler)
 
 	// Wire up order, trade, and position repositories and handler
@@ -48,7 +52,16 @@ func main() {
 	portfolioHandler := api.NewPortfolioHandler(posRepo, tradeRepo)
 	api.RegisterPortfolioRoutes(r, portfolioHandler)
 
+	sessionRepo := repos.NewSessionRepository(db)
+	r.POST("/sessions", api.CreateSession(sessionRepo))
+	r.POST("/sessions/end", api.EndSession(sessionRepo))
+	r.GET("/sessions", api.ListSessions(sessionRepo))
+
 	api.RegisterMarketRoutes(r)
+
+	r.GET("/tickers", api.ListTickers)
+	r.POST("/tickers", api.AddTicker)
+	r.DELETE("/tickers/:symbol", api.RemoveTicker)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

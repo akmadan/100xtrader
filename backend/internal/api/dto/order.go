@@ -4,12 +4,14 @@ package dto
 // Validation tags are used by Gin and go-playground/validator
 
 type OrderCreateRequest struct {
-	User     string  `json:"user" binding:"required"`
-	Symbol   string  `json:"symbol" binding:"required"`
-	Side     string  `json:"side" binding:"required,oneof=buy sell"`
-	Type     string  `json:"type" binding:"required,oneof=market limit stop"`
-	Quantity float64 `json:"quantity" binding:"required,gt=0"`
-	Price    float64 `json:"price" binding:"required,gt=0"`
+	User      string  `json:"user" binding:"required"`
+	Symbol    string  `json:"symbol" binding:"required"`
+	Side      string  `json:"side" binding:"required,oneof=buy sell"`
+	Type      string  `json:"type" binding:"required,oneof=market limit stop"`
+	Quantity  float64 `json:"quantity" binding:"required,gt=0"`
+	Price     float64 `json:"price" binding:"required,gt=0"`
+	SessionID string  `json:"session_id" binding:"required"`
+	Source    string  `json:"source" binding:"required,oneof=user ai"`
 }
 
 // OrderResponse is the response body for an order
