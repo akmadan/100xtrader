@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
+
+	"100xtrader/go-core/internal/utils"
 )
 
 // Migration represents a database migration
@@ -50,13 +52,26 @@ func (mr *MigrationRunner) RunMigrations(migrationsDir string) error {
 	// Apply pending migrations
 	for _, migration := range migrations {
 		if !appliedMigrations[migration.Version] {
-			log.Printf("Applying migration %d: %s", migration.Version, migration.Name)
+			start := time.Now()
+			utils.LogInfo("Applying migration", map[string]interface{}{
+				"version": migration.Version,
+				"name":    migration.Name,
+			})
 
 			if err := mr.applyMigration(migration); err != nil {
+				utils.LogError(err, "Failed to apply migration", map[string]interface{}{
+					"version": migration.Version,
+					"name":    migration.Name,
+				})
 				return fmt.Errorf("failed to apply migration %d: %w", migration.Version, err)
 			}
 
-			log.Printf("Migration %d applied successfully", migration.Version)
+			duration := time.Since(start)
+			utils.LogInfo("Migration applied successfully", map[string]interface{}{
+				"version":  migration.Version,
+				"name":     migration.Name,
+				"duration": duration.String(),
+			})
 		}
 	}
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"100xtrader/go-core/internal/data"
+	"100xtrader/go-core/internal/utils"
 )
 
 // UserRepository handles user-related database operations
@@ -20,6 +21,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 // Create creates a new user
 func (r *UserRepository) Create(user *data.User) error {
+	start := time.Now()
 	query := `
 		INSERT INTO users (name, email, phone, last_signed_in, created_at)
 		VALUES (?, ?, ?, ?, ?)
@@ -29,16 +31,30 @@ func (r *UserRepository) Create(user *data.User) error {
 	user.CreatedAt = now
 
 	result, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.LastSignedIn, user.CreatedAt)
+	duration := time.Since(start)
+
 	if err != nil {
+		utils.LogDatabase("CREATE", "users", duration, err, map[string]interface{}{
+			"email": user.Email,
+			"name":  user.Name,
+		})
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
+		utils.LogError(err, "Failed to get user ID", map[string]interface{}{
+			"email": user.Email,
+		})
 		return fmt.Errorf("failed to get user ID: %w", err)
 	}
 
 	user.ID = int(id)
+	utils.LogDatabase("CREATE", "users", duration, nil, map[string]interface{}{
+		"user_id": user.ID,
+		"email":   user.Email,
+	})
+
 	return nil
 }
 

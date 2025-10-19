@@ -2,29 +2,41 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
+	_ "100xtrader/go-core/docs" // Import generated docs
+	"100xtrader/go-core/internal/api"
 	"100xtrader/go-core/internal/data"
+	"100xtrader/go-core/internal/utils"
 )
 
 func main() {
+	// Initialize logger
+	utils.InitLogger()
+
 	// Get the current working directory
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatal("Failed to get working directory:", err)
+		utils.LogFatal("Failed to get working directory", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Set up database path
 	dbPath := filepath.Join(wd, "..", "temp_db.sqlite")
 
-	fmt.Printf("Initializing database at: %s\n", dbPath)
+	utils.LogInfo("Initializing database", map[string]interface{}{
+		"path": dbPath,
+	})
 
 	// Initialize database
 	db, err := data.NewDB(dbPath)
 	if err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		utils.LogFatal("Failed to initialize database", map[string]interface{}{
+			"error": err.Error(),
+			"path":  dbPath,
+		})
 	}
 	defer db.Close()
 
@@ -33,7 +45,9 @@ func main() {
 
 	// Create indexes for better performance
 	if err := db.CreateIndexes(); err != nil {
-		log.Fatal("Failed to create indexes:", err)
+		utils.LogFatal("Failed to create indexes", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	// Run migrations
@@ -41,24 +55,34 @@ func main() {
 	migrationsDir := filepath.Join(wd, "migrations")
 
 	if err := migrationRunner.RunMigrations(migrationsDir); err != nil {
-		log.Fatal("Failed to run migrations:", err)
+		utils.LogFatal("Failed to run migrations", map[string]interface{}{
+			"error": err.Error(),
+			"dir":   migrationsDir,
+		})
 	}
 
-	fmt.Println("✅ Database initialized successfully!")
-	fmt.Println("✅ All tables created with proper relationships")
-	fmt.Println("✅ Indexes created for optimal performance")
-	fmt.Println("✅ Migrations applied successfully")
+	utils.LogInfo("Database initialization completed successfully")
 
 	// Test database connection
 	if err := testDatabase(db); err != nil {
-		log.Fatal("Database test failed:", err)
+		utils.LogFatal("Database test failed", map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
-	fmt.Println("✅ Database test passed!")
+	utils.LogInfo("Database test passed")
 
-	// Run example operations
-	fmt.Println("\n--- Running Example Operations ---")
-	Example()
+	// Start API server
+	utils.LogInfo("Starting API server")
+	server := api.NewServer(db)
+
+	// Start the server
+	utils.LogInfo("API server ready to accept requests")
+	if err := server.Run(":8080"); err != nil {
+		utils.LogFatal("Failed to start API server", map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 }
 
 // testDatabase performs basic database connectivity and structure tests
@@ -80,9 +104,15 @@ func testDatabase(db *data.DB) error {
 		var count int
 		query := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
 		if err := conn.QueryRow(query).Scan(&count); err != nil {
+			utils.LogError(err, "Table test failed", map[string]interface{}{
+				"table": table,
+			})
 			return fmt.Errorf("table %s test failed: %w", table, err)
 		}
-		fmt.Printf("✅ Table '%s' exists and is accessible\n", table)
+		utils.LogInfo("Table exists and is accessible", map[string]interface{}{
+			"table": table,
+			"count": count,
+		})
 	}
 
 	return nil

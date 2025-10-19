@@ -11,3 +11,4 @@
 .env.test.local
 .env.production.local
 
+temp_db.sqlite

@@ -3,9 +3,10 @@ package data
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+
+	"100xtrader/go-core/internal/utils"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -164,7 +165,7 @@ func (db *DB) InitTables() error {
 		}
 	}
 
-	log.Println("Database tables initialized successfully")
+	utils.LogInfo("Database tables initialized successfully")
 	return nil
 }
 
@@ -192,7 +193,7 @@ func (db *DB) CreateIndexes() error {
 		}
 	}
 
-	log.Println("Database indexes created successfully")
+	utils.LogInfo("Database indexes created successfully")
 	return nil
 }
 
