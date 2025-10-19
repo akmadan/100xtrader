@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"100xtrader/go-core/internal/api/dto"
-	"100xtrader/go-core/internal/data"
-	"100xtrader/go-core/internal/data/repos"
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/api/dto"
+	"go-core/internal/data"
+	"go-core/internal/data/repos"
+	"go-core/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/utils"
 
 	_ "github.com/mattn/go-sqlite3"
 )

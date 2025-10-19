@@ -20,11 +20,11 @@ import (
 	"net/http"
 	"time"
 
-	"100xtrader/go-core/internal/api/dto"
-	"100xtrader/go-core/internal/api/handlers"
-	"100xtrader/go-core/internal/api/middleware"
-	"100xtrader/go-core/internal/data"
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/api/dto"
+	"go-core/internal/api/handlers"
+	"go-core/internal/api/middleware"
+	"go-core/internal/data"
+	"go-core/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

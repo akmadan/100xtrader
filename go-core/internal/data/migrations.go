@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/utils"
 )
 
 // Migration represents a database migration

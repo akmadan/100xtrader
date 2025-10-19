@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"100xtrader/go-core/internal/api/dto"
-	"100xtrader/go-core/internal/data"
+	"go-core/internal/api/dto"
+	"go-core/internal/data"
 
 	"github.com/gin-gonic/gin"
 )

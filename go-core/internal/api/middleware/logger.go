@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

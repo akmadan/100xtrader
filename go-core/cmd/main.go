@@ -5,10 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "100xtrader/go-core/docs" // Import generated docs
-	"100xtrader/go-core/internal/api"
-	"100xtrader/go-core/internal/data"
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/api"
+	"go-core/internal/data"
+	"go-core/internal/utils"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"100xtrader/go-core/internal/data"
-	"100xtrader/go-core/internal/utils"
+	"go-core/internal/data"
+	"go-core/internal/utils"
 )
 
 // TradeJournalRepository handles trade journal-related database operations

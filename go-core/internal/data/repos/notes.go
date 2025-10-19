@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"100xtrader/go-core/internal/data"
+	"go-core/internal/data"
 )
 
 // NotesRepository handles notes-related database operations
