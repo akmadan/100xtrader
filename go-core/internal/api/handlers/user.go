@@ -190,6 +190,18 @@ func ListUsers(db *data.DB) gin.HandlerFunc {
 }
 
 // UpdateUser updates a user
+// @Summary Update user
+// @Description Update an existing user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body dto.UserUpdateRequest true "User update data"
+// @Success 200 {object} dto.SuccessResponse{data=dto.UserResponse} "User updated successfully"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request data"
+// @Failure 404 {object} dto.ErrorResponse "User not found"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/v1/users/{id} [put]
 func UpdateUser(db *data.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idStr := c.Param("id")
@@ -268,6 +280,17 @@ func UpdateUser(db *data.DB) gin.HandlerFunc {
 }
 
 // DeleteUser deletes a user
+// @Summary Delete user
+// @Description Delete a user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} dto.SuccessResponse "User deleted successfully"
+// @Failure 400 {object} dto.ErrorResponse "Invalid user ID"
+// @Failure 404 {object} dto.ErrorResponse "User not found"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/v1/users/{id} [delete]
 func DeleteUser(db *data.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idStr := c.Param("id")
@@ -305,6 +328,17 @@ func DeleteUser(db *data.DB) gin.HandlerFunc {
 }
 
 // SignInUser handles user sign in
+// @Summary Sign in user
+// @Description Sign in a user with email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body dto.UserSignInRequest true "Sign in credentials"
+// @Success 200 {object} dto.SuccessResponse{data=dto.UserSignInResponse} "Sign in successful"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request data"
+// @Failure 401 {object} dto.ErrorResponse "Invalid credentials"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/v1/users/signin [post]
 func SignInUser(db *data.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.UserSignInRequest

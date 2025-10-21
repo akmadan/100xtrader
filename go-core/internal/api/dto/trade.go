@@ -134,3 +134,38 @@ type TradeWithJournalResponse struct {
 	TradeResponse
 	Journal *TradeJournalResponse `json:"journal,omitempty"`
 }
+
+// TradeActionRequest represents the request to add a trade action
+type TradeActionRequest struct {
+	Action    string    `json:"action" validate:"required,oneof=buy sell"`
+	TradeTime time.Time `json:"trade_time" validate:"required"`
+	Quantity  int       `json:"quantity" validate:"required,gt=0"`
+	Price     float64   `json:"price" validate:"required,gt=0"`
+	Fee       float64   `json:"fee" validate:"gte=0"`
+}
+
+// TradeJournalRequest represents the request to update a trade journal
+type TradeJournalRequest struct {
+	Notes      string `json:"notes" validate:"required,min=1"`
+	Confidence int    `json:"confidence" validate:"required,min=0,max=10"`
+}
+
+// TradeScreenshotRequest represents the request to add a screenshot
+type TradeScreenshotRequest struct {
+	URL string `json:"url" validate:"required,url"`
+}
+
+// TagRequest represents the request to create a tag (alias for TagCreateRequest)
+type TagRequest = TagCreateRequest
+
+// TagListResponse represents the response for listing tags
+type TagListResponse struct {
+	Tags  []TagResponse `json:"tags"`
+	Total int           `json:"total"`
+}
+
+// TagTradeRequest represents the request to add a tag to a trade
+type TagTradeRequest struct {
+	TradeID string `json:"trade_id" validate:"required"`
+	TagID   int    `json:"tag_id" validate:"required,min=1"`
+}

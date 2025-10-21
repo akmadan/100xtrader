@@ -1,3 +1,19 @@
+// @title 100xTrader API
+// @version 1.0
+// @description A comprehensive trading journal API for tracking trades, setups, and market analysis
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+
 package main
 
 import (
@@ -5,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
+	_ "go-core/docs" // Import docs for swagger
 	"go-core/internal/api"
 	"go-core/internal/data"
 	"go-core/internal/utils"

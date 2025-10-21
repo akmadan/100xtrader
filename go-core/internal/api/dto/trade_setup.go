@@ -66,3 +66,6 @@ type TradeSetupStatsResponse struct {
 	AvgRiskReward   float64        `json:"avg_risk_reward"`
 	MarketBreakdown map[string]int `json:"market_breakdown"`
 }
+
+// TradeSetupRequest represents the request to create a trade setup (alias for TradeSetupCreateRequest)
+type TradeSetupRequest = TradeSetupCreateRequest

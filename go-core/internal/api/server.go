@@ -27,6 +27,8 @@ import (
 	"go-core/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Server represents the API server
@@ -70,6 +72,9 @@ func (s *Server) setupMiddleware() {
 func (s *Server) setupRoutes() {
 	// Health check endpoint
 	s.router.GET("/health", s.healthCheck)
+
+	// Swagger documentation
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1 routes
 	v1 := s.router.Group("/api/v1")

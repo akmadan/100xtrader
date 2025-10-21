@@ -84,3 +84,6 @@ type DailyNoteResponse struct {
 	Count int            `json:"count"`
 	Mood  string         `json:"mood,omitempty"`
 }
+
+// NoteRequest represents the request to create a note (alias for NoteCreateRequest)
+type NoteRequest = NoteCreateRequest
