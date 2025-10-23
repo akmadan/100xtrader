@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Sidebar from './Sidebar';
-import { ColorDemo } from './index';
+import Sidebar from './Sidebar/Sidebar';
+import { ColorDemo, ConfigurePage } from './index';
+import TradesPage from './Trade/TradesPage';
+import { CalendarPage } from './Calendar';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,6 +26,12 @@ export default function Layout({ children }: LayoutProps) {
     switch (activePage) {
       case 'Color Demo':
         return <ColorDemo />;
+      case 'Configure':
+        return <ConfigurePage />;
+      case 'Trades':
+        return <TradesPage />;
+      case 'Calendar':
+        return <CalendarPage />;
       default:
         return children;
     }

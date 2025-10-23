@@ -8,3 +8,6 @@ export PATH=$PATH:/Users/akshitmadan/go/bin
 
 ### Generate/update swagger docs
 swag init
+
+
+- Configure -> Strategies, Mistakes, Rules

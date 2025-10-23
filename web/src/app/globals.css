@@ -45,10 +45,10 @@
 /* Dark Theme Colors */
 .dark {
   /* Background Colors */
-  --bg-darker: #052323;
-  --bg-primary: #031B1B;
-  --bg-secondary: #2cc295;
-  --bg-tertiary: #03634C;
+  --bg-darker: #010e0e;
+  --bg-primary: #010e0e;
+  --bg-secondary: #03634C;
+  --bg-tertiary: #014b3a;
   --bg-accent: #2EC197;
   
   /* Text Colors */
@@ -210,4 +210,64 @@ body {
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--bg-accent);
+}
+
+/* Line clamp utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Modal animations */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Sidebar section styling */
+.sidebar-section-header {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.sidebar-section-item {
+  margin-left: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+}
+
+.sidebar-section-item:hover {
+  color: var(--text-primary);
+}
+
+.sidebar-section-item.active {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
 }

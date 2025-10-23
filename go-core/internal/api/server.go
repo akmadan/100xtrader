@@ -118,18 +118,6 @@ func (s *Server) setupRoutes() {
 			setups.GET("/user/:user_id", handlers.GetSetupsByUser(s.db))
 		}
 
-		// Notes routes
-		notes := v1.Group("/notes")
-		{
-			notes.POST("", handlers.CreateNote(s.db))
-			notes.GET("/:id", handlers.GetNote(s.db))
-			notes.PUT("/:id", handlers.UpdateNote(s.db))
-			notes.DELETE("/:id", handlers.DeleteNote(s.db))
-			notes.GET("", handlers.ListNotes(s.db))
-			notes.GET("/user/:user_id", handlers.GetNotesByUser(s.db))
-			notes.GET("/user/:user_id/daily", handlers.GetDailyNotes(s.db))
-		}
-
 		// Tags routes
 		tags := v1.Group("/tags")
 		{
