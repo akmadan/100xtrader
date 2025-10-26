@@ -1,23 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Info, Brain, Clock, Calendar, ArrowUp, ArrowDown, Upload, Plus, Trash2 } from 'lucide-react';
-import { ITradeFormData, IModalProps, MarketType, TradeDirection, TradeDuration, OutcomeSummary } from '@/types';
+import { X, Info, Brain, Clock, Calendar, ArrowUp, ArrowDown, Upload, Plus } from 'lucide-react';
+import { ITradeFormData, ITradeModalProps, MarketType, TradeDirection, TradeDuration, OutcomeSummary } from '@/types';
 
 const marketTypes: { value: MarketType; label: string }[] = [
-  { value: 'indian', label: 'Indian' },
-  { value: 'us', label: 'US' },
-  { value: 'crypto', label: 'Crypto' },
-  { value: 'forex', label: 'Forex' },
-  { value: 'commodities', label: 'Commodities' },
+  { value: MarketType.INDIAN, label: 'Indian' },
+  { value: MarketType.US, label: 'US' },
+  { value: MarketType.CRYPTO, label: 'Crypto' },
+  { value: MarketType.FOREX, label: 'Forex' },
+  { value: MarketType.COMMODITIES, label: 'Commodities' },
 ];
 
 const outcomeSummaries: { value: OutcomeSummary; label: string }[] = [
-  { value: 'profitable', label: 'Profitable' },
-  { value: 'loss', label: 'Loss' },
-  { value: 'breakeven', label: 'Breakeven' },
-  { value: 'partial_profit', label: 'Partial Profit' },
-  { value: 'partial_loss', label: 'Partial Loss' },
+  { value: OutcomeSummary.PROFITABLE, label: 'Profitable' },
+  { value: OutcomeSummary.LOSS, label: 'Loss' },
+  { value: OutcomeSummary.BREAKEVEN, label: 'Breakeven' },
+  { value: OutcomeSummary.PARTIAL_PROFIT, label: 'Partial Profit' },
+  { value: OutcomeSummary.PARTIAL_LOSS, label: 'Partial Loss' },
 ];
 
 const emotionalStates = [
@@ -31,24 +31,23 @@ const commonMistakes = [
   'No Clear Plan', 'No Mistakes'
 ];
 
-export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
+export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
   const [activeTab, setActiveTab] = useState<'general' | 'psychology'>('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newRule, setNewRule] = useState('');
 
   const [formData, setFormData] = useState<ITradeFormData>({
     symbol: '',
-    marketType: 'indian',
+    marketType: MarketType.INDIAN,
     entryDate: '',
     entryPrice: 0,
     quantity: 0,
     totalAmount: 0,
     exitPrice: 0,
-    pnlAmount: 0,
-    pnlPercentage: 0,
-    direction: 'long',
+    direction: TradeDirection.LONG,
+    duration: TradeDuration.INTRADAY,
     strategy: '',
-    outcomeSummary: '',
+    outcomeSummary: OutcomeSummary.PROFITABLE,
     tradeAnalysis: '',
     rulesFollowed: [],
     screenshots: [],
@@ -61,14 +60,14 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
     },
   });
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | TradeDirection | TradeDuration | OutcomeSummary | MarketType) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handlePsychologyChange = (field: string, value: any) => {
+  const handlePsychologyChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       psychology: {
@@ -124,17 +123,16 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
   const handleClose = () => {
     setFormData({
       symbol: '',
-      marketType: 'indian',
+      marketType: MarketType.INDIAN,
       entryDate: '',
       entryPrice: 0,
       quantity: 0,
       totalAmount: 0,
       exitPrice: 0,
-      pnlAmount: 0,
-      pnlPercentage: 0,
-      direction: 'long',
+      direction: TradeDirection.LONG,
+      duration: TradeDuration.INTRADAY,
       strategy: '',
-      outcomeSummary: '',
+      outcomeSummary: OutcomeSummary.PROFITABLE,
       tradeAnalysis: '',
       rulesFollowed: [],
       screenshots: [],
@@ -154,7 +152,7 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-60 modal-backdrop flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div 
@@ -210,9 +208,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => handleInputChange('duration', 'intraday')}
+                    onClick={() => handleInputChange('duration', TradeDuration.INTRADAY)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
-                      formData.duration === 'intraday'
+                      formData.duration === TradeDuration.INTRADAY
                         ? 'bg-secondary border-accent text-primary'
                         : 'bg-primary border-primary text-tertiary hover:text-primary'
                     }`}
@@ -222,9 +220,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleInputChange('duration', 'swing')}
+                    onClick={() => handleInputChange('duration', TradeDuration.SWING)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
-                      formData.duration === 'swing'
+                      formData.duration === TradeDuration.SWING
                         ? 'bg-secondary border-accent text-primary'
                         : 'bg-primary border-primary text-tertiary hover:text-primary'
                     }`}
@@ -351,21 +349,8 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.pnlAmount}
-                    onChange={(e) => handleInputChange('pnlAmount', parseFloat(e.target.value) || 0)}
-                    placeholder="Amount"
-                    className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-helvetica-medium text-primary mb-2">
-                    P&L (%)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.pnlPercentage}
-                    onChange={(e) => handleInputChange('pnlPercentage', parseFloat(e.target.value) || 0)}
+                    value={formData.exitPrice}
+                    onChange={(e) => handleInputChange('exitPrice', parseFloat(e.target.value) || 0)}
                     placeholder="% Change"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                   />
@@ -380,9 +365,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => handleInputChange('direction', 'long')}
+                    onClick={() => handleInputChange('direction', TradeDirection.LONG)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
-                      formData.direction === 'long'
+                      formData.direction === TradeDirection.LONG
                         ? 'bg-green-500/20 border-green-500 text-green-400'
                         : 'bg-primary border-primary text-tertiary hover:text-primary'
                     }`}
@@ -392,9 +377,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: IModalProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleInputChange('direction', 'short')}
+                    onClick={() => handleInputChange('direction', TradeDirection.SHORT)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
-                      formData.direction === 'short'
+                      formData.direction === TradeDirection.SHORT
                         ? 'bg-red-500/20 border-red-500 text-red-400'
                         : 'bg-primary border-primary text-tertiary hover:text-primary'
                     }`}

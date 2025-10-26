@@ -24,9 +24,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/notes": {
+        "/api/v1/mistakes": {
             "get": {
-                "description": "Retrieve a list of all notes",
+                "description": "Retrieve a paginated list of mistakes",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,914 +34,40 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "notes"
+                    "mistakes"
                 ],
-                "summary": "List notes",
-                "responses": {
-                    "200": {
-                        "description": "Notes retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.NoteListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new note for a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Create note",
-                "parameters": [
-                    {
-                        "description": "Note data",
-                        "name": "note",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.NoteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Note created successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.NoteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/notes/user/{user_id}": {
-            "get": {
-                "description": "Retrieve all notes for a specific user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Get notes by user",
+                "summary": "List mistakes",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Notes retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.NoteListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid user ID",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/notes/user/{user_id}/daily": {
-            "get": {
-                "description": "Retrieve daily notes for a specific user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Get daily notes",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daily notes retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.NoteListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid user ID",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/notes/{id}": {
-            "get": {
-                "description": "Retrieve a specific note by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Get note",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Note retrieved successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.NoteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Note not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update an existing note",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Update note",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Note update data",
-                        "name": "note",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.NoteUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Note updated successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.NoteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Note not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a note",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notes"
-                ],
-                "summary": "Delete note",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Note deleted successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Note not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tags": {
-            "get": {
-                "description": "Retrieve a list of all tags",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "List tags",
-                "responses": {
-                    "200": {
-                        "description": "Tags retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.TagListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new tag",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "Create tag",
-                "parameters": [
-                    {
-                        "description": "Tag data",
-                        "name": "tag",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TagRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Tag created successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TagResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tags/trade": {
-            "post": {
-                "description": "Add a tag to an existing trade",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "Add tag to trade",
-                "parameters": [
-                    {
-                        "description": "Tag and trade association data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TagTradeRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tag added to trade successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Tag or trade not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tags/trade/{trade_id}/{tag_id}": {
-            "delete": {
-                "description": "Remove a tag from a trade",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "Remove tag from trade",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Trade ID",
-                        "name": "trade_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Tag ID",
-                        "name": "tag_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tag removed from trade successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Tag or trade not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tags/{id}": {
-            "get": {
-                "description": "Retrieve a specific tag by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "Get tag",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tag ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tag retrieved successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TagResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Tag not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trade-setups": {
-            "get": {
-                "description": "Retrieve a list of all trade setups",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "List trade setups",
-                "responses": {
-                    "200": {
-                        "description": "Setups retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeSetupListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new trade setup with market analysis",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "Create trade setup",
-                "parameters": [
-                    {
-                        "description": "Trade setup data",
-                        "name": "setup",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeSetupRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Setup created successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeSetupResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trade-setups/user/{user_id}": {
-            "get": {
-                "description": "Retrieve all trade setups for a specific user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "Get setups by user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Setups retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeSetupListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid user ID",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trade-setups/{id}": {
-            "get": {
-                "description": "Retrieve a specific trade setup by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "Get trade setup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Setup ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Setup retrieved successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeSetupResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Setup not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update an existing trade setup",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "Update trade setup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Setup ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Setup update data",
-                        "name": "setup",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeSetupUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Setup updated successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeSetupResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Setup not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a trade setup",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trade-setups"
-                ],
-                "summary": "Delete trade setup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Setup ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Setup deleted successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Setup not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trades": {
-            "get": {
-                "description": "Retrieve a list of trades with optional filtering by user_id, market, and include_journal",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trades"
-                ],
-                "summary": "List trades",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Filter by user ID",
-                        "name": "user_id",
+                        "description": "Number of mistakes to return (default: 10, max: 100)",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "Filter by market type",
-                        "name": "market",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Include journal data in response",
-                        "name": "include_journal",
+                        "type": "integer",
+                        "description": "Number of mistakes to skip (default: 0)",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Trades retrieved successfully",
+                        "description": "Mistakes retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/dto.TradeListResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetMistakesResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -959,7 +85,1249 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new trade with optional journal entry, trade actions, and tags",
+                "description": "Create a new trading mistake",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Create a new mistake",
+                "parameters": [
+                    {
+                        "description": "Mistake data",
+                        "name": "mistake",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateMistakeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Mistake created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MistakeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mistakes/user/{user_id}": {
+            "get": {
+                "description": "Retrieve a paginated list of mistakes for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Get mistakes by user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of mistakes to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of mistakes to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User mistakes retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetMistakesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mistakes/user/{user_id}/category/{category}": {
+            "get": {
+                "description": "Retrieve a paginated list of mistakes filtered by category for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Get mistakes by category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Mistake category",
+                        "name": "category",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of mistakes to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of mistakes to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User mistakes by category retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetMistakesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID, category, or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mistakes/{id}": {
+            "get": {
+                "description": "Retrieve a specific mistake with all its details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Get a mistake by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mistake ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mistake retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MistakeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid mistake ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mistake not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing mistake with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Update a mistake",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mistake ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated mistake data",
+                        "name": "mistake",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateMistakeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mistake updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MistakeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mistake not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a specific mistake by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mistakes"
+                ],
+                "summary": "Delete a mistake",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mistake ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mistake deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid mistake ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mistake not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules": {
+            "get": {
+                "description": "Retrieve a paginated list of rules",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "List rules",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rules retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetRulesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new trading rule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Create a new rule",
+                "parameters": [
+                    {
+                        "description": "Rule data",
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Rule created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/user/{user_id}": {
+            "get": {
+                "description": "Retrieve a paginated list of rules for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Get rules by user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User rules retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetRulesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/user/{user_id}/category/{category}": {
+            "get": {
+                "description": "Retrieve a paginated list of rules filtered by category for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Get rules by category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Rule category",
+                        "name": "category",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of rules to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User rules by category retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetRulesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID, category, or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/{id}": {
+            "get": {
+                "description": "Retrieve a specific rule with all its details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Get a rule by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Rule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rule retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid rule ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Rule not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing rule with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Update a rule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Rule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated rule data",
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rule updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Rule not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a specific rule by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Delete a rule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Rule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rule deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid rule ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Rule not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/strategies": {
+            "get": {
+                "description": "Retrieve a paginated list of strategies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "List strategies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of strategies to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of strategies to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Strategies retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetStrategiesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new trading strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "Create a new strategy",
+                "parameters": [
+                    {
+                        "description": "Strategy data",
+                        "name": "strategy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateStrategyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Strategy created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.StrategyResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/strategies/user/{user_id}": {
+            "get": {
+                "description": "Retrieve a paginated list of strategies for a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "Get strategies by user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of strategies to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of strategies to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User strategies retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetStrategiesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID or query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/strategies/{id}": {
+            "get": {
+                "description": "Retrieve a specific strategy with all its details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "Get a strategy by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Strategy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Strategy retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.StrategyResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid strategy ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Strategy not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing strategy with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "Update a strategy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Strategy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated strategy data",
+                        "name": "strategy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateStrategyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Strategy updated successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.StrategyResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Strategy not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a specific strategy by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "strategies"
+                ],
+                "summary": "Delete a strategy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Strategy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Strategy deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid strategy ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Strategy not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/trades": {
+            "get": {
+                "description": "Retrieve a paginated list of trades",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trades"
+                ],
+                "summary": "List trades",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of trades to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of trades to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Trades retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetTradesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new trade with all required and optional fields",
                 "consumes": [
                     "application/json"
                 ],
@@ -972,12 +1340,12 @@ const docTemplate = `{
                 "summary": "Create a new trade",
                 "parameters": [
                     {
-                        "description": "Trade creation data",
+                        "description": "Trade data",
                         "name": "trade",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.TradeCreateRequest"
+                            "$ref": "#/definitions/dto.CreateTradeRequest"
                         }
                     }
                 ],
@@ -1017,7 +1385,7 @@ const docTemplate = `{
         },
         "/api/v1/trades/user/{user_id}": {
             "get": {
-                "description": "Retrieve all trades for a specific user",
+                "description": "Retrieve a paginated list of trades for a specific user",
                 "consumes": [
                     "application/json"
                 ],
@@ -1035,17 +1403,41 @@ const docTemplate = `{
                         "name": "user_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of trades to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of trades to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Trades retrieved successfully",
+                        "description": "User trades retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/dto.TradeListResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetTradesResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "Invalid user ID",
+                        "description": "Invalid user ID or query parameters",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1061,7 +1453,7 @@ const docTemplate = `{
         },
         "/api/v1/trades/{id}": {
             "get": {
-                "description": "Retrieve a specific trade with its journal, actions, tags, and screenshots",
+                "description": "Retrieve a specific trade with all its details",
                 "consumes": [
                     "application/json"
                 ],
@@ -1071,7 +1463,7 @@ const docTemplate = `{
                 "tags": [
                     "trades"
                 ],
-                "summary": "Get trade by ID",
+                "summary": "Get a trade by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -1100,6 +1492,12 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "Invalid trade ID",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Trade not found",
                         "schema": {
@@ -1125,7 +1523,7 @@ const docTemplate = `{
                 "tags": [
                     "trades"
                 ],
-                "summary": "Update trade",
+                "summary": "Update a trade",
                 "parameters": [
                     {
                         "type": "string",
@@ -1135,12 +1533,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Trade update data",
+                        "description": "Updated trade data",
                         "name": "trade",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.TradeUpdateRequest"
+                            "$ref": "#/definitions/dto.UpdateTradeRequest"
                         }
                     }
                 ],
@@ -1184,7 +1582,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a trade and all its associated data",
+                "description": "Delete a specific trade by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1194,7 +1592,7 @@ const docTemplate = `{
                 "tags": [
                     "trades"
                 ],
-                "summary": "Delete trade",
+                "summary": "Delete a trade",
                 "parameters": [
                     {
                         "type": "string",
@@ -1211,266 +1609,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
-                    "404": {
-                        "description": "Trade not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trades/{id}/actions": {
-            "post": {
-                "description": "Add a new action to an existing trade",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trades"
-                ],
-                "summary": "Add trade action",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Trade ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Trade action data",
-                        "name": "action",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeActionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Action added successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeActionResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
                     "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Trade not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trades/{id}/actions/{action_id}": {
-            "delete": {
-                "description": "Remove a specific action from a trade",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trades"
-                ],
-                "summary": "Remove trade action",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Trade ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Action ID",
-                        "name": "action_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Action removed successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Trade or action not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trades/{id}/journal": {
-            "post": {
-                "description": "Update or create a journal entry for a trade",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trades"
-                ],
-                "summary": "Update trade journal",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Trade ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Journal data",
-                        "name": "journal",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeJournalRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Journal updated successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeJournalResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Trade not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/trades/{id}/screenshots": {
-            "post": {
-                "description": "Add a screenshot to a trade journal",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "trades"
-                ],
-                "summary": "Add screenshot",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Trade ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Screenshot data",
-                        "name": "screenshot",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.TradeScreenshotRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Screenshot added successfully",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.TradeScreenshotResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
+                        "description": "Invalid trade ID",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1492,7 +1632,7 @@ const docTemplate = `{
         },
         "/api/v1/users": {
             "get": {
-                "description": "Retrieve a list of all users in the system",
+                "description": "Retrieve a paginated list of users",
                 "consumes": [
                     "application/json"
                 ],
@@ -1502,12 +1642,44 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "List all users",
+                "summary": "List users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of users to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Users retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserListResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetUsersResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
@@ -1519,7 +1691,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new user account with name, email, and optional phone",
+                "description": "Create a new user account",
                 "consumes": [
                     "application/json"
                 ],
@@ -1532,12 +1704,12 @@ const docTemplate = `{
                 "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "User creation data",
+                        "description": "User data",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserCreateRequest"
+                            "$ref": "#/definitions/dto.CreateUserRequest"
                         }
                     }
                 ],
@@ -1577,7 +1749,7 @@ const docTemplate = `{
         },
         "/api/v1/users/signin": {
             "post": {
-                "description": "Sign in a user with email",
+                "description": "Authenticate user and return user data",
                 "consumes": [
                     "application/json"
                 ],
@@ -1590,18 +1762,18 @@ const docTemplate = `{
                 "summary": "Sign in user",
                 "parameters": [
                     {
-                        "description": "Sign in credentials",
+                        "description": "User credentials",
                         "name": "credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignInRequest"
+                            "$ref": "#/definitions/dto.SignInRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Sign in successful",
+                        "description": "User signed in successfully",
                         "schema": {
                             "allOf": [
                                 {
@@ -1611,7 +1783,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.UserSignInResponse"
+                                            "$ref": "#/definitions/dto.UserResponse"
                                         }
                                     }
                                 }
@@ -1619,13 +1791,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request data",
+                        "description": "Invalid credentials",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Invalid credentials",
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1641,7 +1813,7 @@ const docTemplate = `{
         },
         "/api/v1/users/{id}": {
             "get": {
-                "description": "Retrieve a specific user by their ID",
+                "description": "Retrieve a specific user with all its details",
                 "consumes": [
                     "application/json"
                 ],
@@ -1651,10 +1823,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user by ID",
+                "summary": "Get a user by ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -1701,7 +1873,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update an existing user",
+                "description": "Update an existing user with new data",
                 "consumes": [
                     "application/json"
                 ],
@@ -1711,22 +1883,22 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Update user",
+                "summary": "Update a user",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "User update data",
+                        "description": "Updated user data",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserUpdateRequest"
+                            "$ref": "#/definitions/dto.UpdateUserRequest"
                         }
                     }
                 ],
@@ -1770,7 +1942,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a user",
+                "description": "Delete a specific user by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1780,10 +1952,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete user",
+                "summary": "Delete a user",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -1849,17 +2021,282 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "data.MarketType": {
+            "type": "string",
+            "enum": [
+                "indian",
+                "us",
+                "crypto",
+                "forex",
+                "commodities"
+            ],
+            "x-enum-varnames": [
+                "MarketTypeIndian",
+                "MarketTypeUS",
+                "MarketTypeCrypto",
+                "MarketTypeForex",
+                "MarketTypeCommodities"
+            ]
+        },
+        "data.MistakeCategory": {
+            "type": "string",
+            "enum": [
+                "psychological",
+                "behavioral"
+            ],
+            "x-enum-varnames": [
+                "MistakeCategoryPsychological",
+                "MistakeCategoryBehavioral"
+            ]
+        },
+        "data.OutcomeSummary": {
+            "type": "string",
+            "enum": [
+                "profitable",
+                "loss",
+                "breakeven",
+                "partial_profit",
+                "partial_loss"
+            ],
+            "x-enum-varnames": [
+                "OutcomeSummaryProfitable",
+                "OutcomeSummaryLoss",
+                "OutcomeSummaryBreakeven",
+                "OutcomeSummaryPartialProfit",
+                "OutcomeSummaryPartialLoss"
+            ]
+        },
+        "data.RuleCategory": {
+            "type": "string",
+            "enum": [
+                "entry",
+                "exit",
+                "stop_loss",
+                "take_profit",
+                "risk_management",
+                "psychology",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "RuleCategoryEntry",
+                "RuleCategoryExit",
+                "RuleCategoryStopLoss",
+                "RuleCategoryTakeProfit",
+                "RuleCategoryRiskManagement",
+                "RuleCategoryPsychology",
+                "RuleCategoryOther"
+            ]
+        },
+        "data.TradeDirection": {
+            "type": "string",
+            "enum": [
+                "long",
+                "short"
+            ],
+            "x-enum-varnames": [
+                "TradeDirectionLong",
+                "TradeDirectionShort"
+            ]
+        },
+        "dto.CreateMistakeRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "name",
+                "user_id"
+            ],
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/data.MistakeCategory"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreatePsychologyRequest": {
+            "type": "object",
+            "required": [
+                "emotional_state",
+                "entry_confidence",
+                "satisfaction_rating"
+            ],
+            "properties": {
+                "emotional_state": {
+                    "type": "string"
+                },
+                "entry_confidence": {
+                    "type": "integer",
+                    "maximum": 10,
+                    "minimum": 1
+                },
+                "lessons_learned": {
+                    "type": "string"
+                },
+                "mistakes_made": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "satisfaction_rating": {
+                    "type": "integer",
+                    "maximum": 10,
+                    "minimum": 1
+                }
+            }
+        },
+        "dto.CreateRuleRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "description",
+                "name",
+                "user_id"
+            ],
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/data.RuleCategory"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateStrategyRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "user_id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateTradeRequest": {
+            "type": "object",
+            "required": [
+                "direction",
+                "entry_date",
+                "entry_price",
+                "market_type",
+                "outcome_summary",
+                "quantity",
+                "strategy",
+                "symbol",
+                "total_amount",
+                "user_id"
+            ],
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/data.TradeDirection"
+                },
+                "entry_date": {
+                    "type": "string"
+                },
+                "entry_price": {
+                    "type": "number"
+                },
+                "exit_price": {
+                    "type": "number"
+                },
+                "market_type": {
+                    "$ref": "#/definitions/data.MarketType"
+                },
+                "outcome_summary": {
+                    "$ref": "#/definitions/data.OutcomeSummary"
+                },
+                "psychology": {
+                    "$ref": "#/definitions/dto.CreatePsychologyRequest"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "rules_followed": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "screenshots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "stop_loss": {
+                    "type": "number"
+                },
+                "strategy": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "trade_analysis": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 2
+                }
+            }
+        },
         "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
-                },
-                "details": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 },
                 "error": {
                     "type": "string"
@@ -1869,136 +2306,196 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.NoteListResponse": {
+        "dto.GetMistakesResponse": {
             "type": "object",
             "properties": {
-                "notes": {
+                "mistakes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.NoteResponse"
+                        "$ref": "#/definitions/dto.MistakeResponse"
                     }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/dto.PaginationResponse"
+                }
+            }
+        },
+        "dto.GetRulesResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.PaginationResponse"
+                },
+                "rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RuleResponse"
+                    }
+                }
+            }
+        },
+        "dto.GetStrategiesResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.PaginationResponse"
+                },
+                "strategies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.StrategyResponse"
+                    }
+                }
+            }
+        },
+        "dto.GetTradesResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.PaginationResponse"
+                },
+                "trades": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TradeResponse"
+                    }
+                }
+            }
+        },
+        "dto.GetUsersResponse": {
+            "type": "object",
+            "properties": {
+                "pagination": {
+                    "$ref": "#/definitions/dto.PaginationResponse"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponse"
+                    }
+                }
+            }
+        },
+        "dto.MistakeResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/data.MistakeCategory"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
                 },
                 "total": {
                     "type": "integer"
                 }
             }
         },
-        "dto.NoteRequest": {
+        "dto.PsychologyResponse": {
             "type": "object",
-            "required": [
-                "day",
-                "market_condition",
-                "market_volatility",
-                "mood",
-                "user_id"
-            ],
             "properties": {
-                "day": {
+                "emotional_state": {
                     "type": "string"
                 },
-                "market_condition": {
-                    "type": "string",
-                    "enum": [
-                        "up",
-                        "down",
-                        "sideways"
-                    ]
+                "entry_confidence": {
+                    "type": "integer"
                 },
-                "market_volatility": {
-                    "type": "string",
-                    "enum": [
-                        "high",
-                        "medium",
-                        "low"
-                    ]
-                },
-                "mood": {
-                    "type": "string",
-                    "enum": [
-                        "excited",
-                        "neutral",
-                        "low"
-                    ]
-                },
-                "notes": {
+                "lessons_learned": {
                     "type": "string"
                 },
-                "summary": {
-                    "type": "string"
+                "mistakes_made": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "user_id": {
-                    "type": "integer",
-                    "minimum": 1
+                "satisfaction_rating": {
+                    "type": "integer"
                 }
             }
         },
-        "dto.NoteResponse": {
+        "dto.RuleResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/data.RuleCategory"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SignInRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.StrategyResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "day": {
+                "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "market_condition": {
                     "type": "string"
                 },
-                "market_volatility": {
+                "name": {
                     "type": "string"
                 },
-                "mood": {
-                    "type": "string"
-                },
-                "notes": {
-                    "type": "string"
-                },
-                "summary": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "dto.NoteUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "day": {
-                    "type": "string"
-                },
-                "market_condition": {
-                    "type": "string",
-                    "enum": [
-                        "up",
-                        "down",
-                        "sideways"
-                    ]
-                },
-                "market_volatility": {
-                    "type": "string",
-                    "enum": [
-                        "high",
-                        "medium",
-                        "low"
-                    ]
-                },
-                "mood": {
-                    "type": "string",
-                    "enum": [
-                        "excited",
-                        "neutral",
-                        "low"
-                    ]
-                },
-                "notes": {
-                    "type": "string"
-                },
-                "summary": {
-                    "type": "string"
                 }
             }
         },
@@ -2011,594 +2508,252 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TagListResponse": {
-            "type": "object",
-            "properties": {
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.TagRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1
-                }
-            }
-        },
-        "dto.TagResponse": {
+        "dto.TradeResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "direction": {
+                    "$ref": "#/definitions/data.TradeDirection"
                 },
-                "name": {
+                "entry_date": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.TagTradeRequest": {
-            "type": "object",
-            "required": [
-                "tag_id",
-                "trade_id"
-            ],
-            "properties": {
-                "tag_id": {
-                    "type": "integer",
-                    "minimum": 1
                 },
-                "trade_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeActionCreateRequest": {
-            "type": "object",
-            "required": [
-                "action",
-                "price",
-                "quantity",
-                "trade_id",
-                "trade_time"
-            ],
-            "properties": {
-                "action": {
-                    "type": "string",
-                    "enum": [
-                        "buy",
-                        "sell"
-                    ]
-                },
-                "fee": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "price": {
+                "entry_price": {
                     "type": "number"
                 },
-                "quantity": {
-                    "type": "integer"
-                },
-                "trade_id": {
-                    "type": "string"
-                },
-                "trade_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeActionRequest": {
-            "type": "object",
-            "required": [
-                "action",
-                "price",
-                "quantity",
-                "trade_time"
-            ],
-            "properties": {
-                "action": {
-                    "type": "string",
-                    "enum": [
-                        "buy",
-                        "sell"
-                    ]
-                },
-                "fee": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "price": {
-                    "type": "number"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "trade_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeActionResponse": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "fee": {
+                "exit_price": {
                     "type": "number"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
-                "price": {
-                    "type": "number"
+                "market_type": {
+                    "$ref": "#/definitions/data.MarketType"
+                },
+                "outcome_summary": {
+                    "$ref": "#/definitions/data.OutcomeSummary"
+                },
+                "psychology": {
+                    "$ref": "#/definitions/dto.PsychologyResponse"
                 },
                 "quantity": {
                     "type": "integer"
                 },
-                "trade_id": {
-                    "type": "string"
-                },
-                "trade_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeCreateRequest": {
-            "type": "object",
-            "required": [
-                "market",
-                "stoploss",
-                "symbol",
-                "target",
-                "user_id"
-            ],
-            "properties": {
-                "actions": {
-                    "description": "Optional trade actions (buy/sell)",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TradeActionCreateRequest"
-                    }
-                },
-                "journal": {
-                    "description": "Optional journal entry",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.TradeJournalCreateRequest"
-                        }
-                    ]
-                },
-                "market": {
-                    "type": "string",
-                    "enum": [
-                        "stock",
-                        "option",
-                        "crypto",
-                        "futures",
-                        "forex",
-                        "index"
-                    ]
-                },
-                "stoploss": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 1
-                },
-                "tags": {
-                    "description": "Optional tags for the trade",
+                "rules_followed": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "target": {
-                    "type": "number"
-                },
-                "user_id": {
-                    "type": "integer",
-                    "minimum": 1
-                }
-            }
-        },
-        "dto.TradeJournalCreateRequest": {
-            "type": "object",
-            "required": [
-                "confidence",
-                "notes"
-            ],
-            "properties": {
-                "confidence": {
-                    "type": "integer",
-                    "maximum": 10,
-                    "minimum": 0
-                },
-                "notes": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "trade_id": {
-                    "description": "Optional when embedded in trade creation",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeJournalRequest": {
-            "type": "object",
-            "required": [
-                "confidence",
-                "notes"
-            ],
-            "properties": {
-                "confidence": {
-                    "type": "integer",
-                    "maximum": 10,
-                    "minimum": 0
-                },
-                "notes": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            }
-        },
-        "dto.TradeJournalResponse": {
-            "type": "object",
-            "properties": {
-                "confidence": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "notes": {
-                    "type": "string"
-                },
                 "screenshots": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TradeScreenshotResponse"
+                        "type": "string"
                     }
                 },
-                "trade_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeListResponse": {
-            "type": "object",
-            "properties": {
-                "total": {
-                    "type": "integer"
-                },
-                "trades": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TradeResponse"
-                    }
-                }
-            }
-        },
-        "dto.TradeResponse": {
-            "type": "object",
-            "properties": {
-                "actions": {
-                    "description": "Trade actions (buy/sell)",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TradeActionResponse"
-                    }
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "journal": {
-                    "description": "Optional journal data",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.TradeJournalResponse"
-                        }
-                    ]
-                },
-                "market": {
-                    "type": "string"
-                },
-                "screenshots": {
-                    "description": "Screenshots in journal",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TradeScreenshotResponse"
-                    }
-                },
-                "stoploss": {
+                "stop_loss": {
                     "type": "number"
+                },
+                "strategy": {
+                    "type": "string"
                 },
                 "symbol": {
                     "type": "string"
                 },
-                "tags": {
-                    "description": "Tags associated with trade",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
-                    }
-                },
                 "target": {
                     "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "trade_analysis": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
                 }
             }
         },
-        "dto.TradeScreenshotRequest": {
+        "dto.UpdateMistakeRequest": {
             "type": "object",
             "required": [
-                "url"
-            ],
-            "properties": {
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeScreenshotResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "trade_journal_id": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.TradeSetupListResponse": {
-            "type": "object",
-            "properties": {
-                "setups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TradeSetupResponse"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.TradeSetupRequest": {
-            "type": "object",
-            "required": [
-                "entry",
-                "market",
-                "side",
-                "stoploss",
-                "symbol",
-                "target",
+                "category",
+                "id",
+                "name",
                 "user_id"
             ],
             "properties": {
-                "entry": {
-                    "type": "number"
-                },
-                "market": {
-                    "type": "string",
-                    "enum": [
-                        "stock",
-                        "option",
-                        "crypto",
-                        "futures",
-                        "forex",
-                        "index"
-                    ]
-                },
-                "note": {
-                    "type": "string"
-                },
-                "risk_reward_ratio": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "side": {
-                    "type": "string",
-                    "enum": [
-                        "long",
-                        "short"
-                    ]
-                },
-                "stoploss": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 1
-                },
-                "target": {
-                    "type": "number"
-                },
-                "user_id": {
-                    "type": "integer",
-                    "minimum": 1
-                }
-            }
-        },
-        "dto.TradeSetupResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "entry": {
-                    "type": "number"
+                "category": {
+                    "$ref": "#/definitions/data.MistakeCategory"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "market": {
-                    "type": "string"
-                },
-                "note": {
-                    "type": "string"
-                },
-                "risk_reward_ratio": {
-                    "type": "number"
-                },
-                "side": {
-                    "type": "string"
-                },
-                "stoploss": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "target": {
-                    "type": "number"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.TradeSetupUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "entry": {
-                    "type": "number"
-                },
-                "market": {
-                    "type": "string",
-                    "enum": [
-                        "stock",
-                        "option",
-                        "crypto",
-                        "futures",
-                        "forex",
-                        "index"
-                    ]
-                },
-                "note": {
-                    "type": "string"
-                },
-                "risk_reward_ratio": {
-                    "type": "number",
-                    "minimum": 0
-                },
-                "side": {
-                    "type": "string",
-                    "enum": [
-                        "long",
-                        "short"
-                    ]
-                },
-                "stoploss": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 1
-                },
-                "target": {
-                    "type": "number"
-                }
-            }
-        },
-        "dto.TradeUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "market": {
-                    "type": "string",
-                    "enum": [
-                        "stock",
-                        "option",
-                        "crypto",
-                        "futures",
-                        "forex",
-                        "index"
-                    ]
-                },
-                "stoploss": {
-                    "type": "number"
-                },
-                "symbol": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 1
-                },
-                "target": {
-                    "type": "number"
-                }
-            }
-        },
-        "dto.UserCreateRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "name"
-            ],
-            "properties": {
-                "email": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string",
                     "maxLength": 255,
-                    "minLength": 2
+                    "minLength": 1
                 },
-                "phone": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 10
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
-        "dto.UserListResponse": {
+        "dto.UpdateRuleRequest": {
             "type": "object",
+            "required": [
+                "category",
+                "description",
+                "id",
+                "name",
+                "user_id"
+            ],
             "properties": {
-                "total": {
+                "category": {
+                    "$ref": "#/definitions/data.RuleCategory"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateStrategyRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "id",
+                "name",
+                "user_id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateTradeRequest": {
+            "type": "object",
+            "required": [
+                "direction",
+                "entry_date",
+                "entry_price",
+                "id",
+                "market_type",
+                "outcome_summary",
+                "quantity",
+                "strategy",
+                "symbol",
+                "total_amount",
+                "user_id"
+            ],
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/data.TradeDirection"
+                },
+                "entry_date": {
+                    "type": "string"
+                },
+                "entry_price": {
+                    "type": "number"
+                },
+                "exit_price": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "market_type": {
+                    "$ref": "#/definitions/data.MarketType"
+                },
+                "outcome_summary": {
+                    "$ref": "#/definitions/data.OutcomeSummary"
+                },
+                "psychology": {
+                    "$ref": "#/definitions/dto.CreatePsychologyRequest"
+                },
+                "quantity": {
                     "type": "integer"
                 },
-                "users": {
+                "rules_followed": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.UserResponse"
+                        "type": "string"
                     }
+                },
+                "screenshots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "stop_loss": {
+                    "type": "number"
+                },
+                "strategy": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "trade_analysis": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 2
                 }
             }
         },
@@ -2622,49 +2777,6 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.UserSignInRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UserSignInResponse": {
-            "type": "object",
-            "properties": {
-                "is_new_user": {
-                    "type": "boolean"
-                },
-                "last_sign_in": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/dto.UserResponse"
-                }
-            }
-        },
-        "dto.UserUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "minLength": 2
-                },
-                "phone": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 10
                 }
             }
         }

@@ -1,29 +1,27 @@
 export interface ITrade {
   id: string;
   userId: string;
-  
+
   // General Trade Information
   symbol: string;
-  marketType: string;
+  marketType: MarketType;
   entryDate: Date;
   entryPrice: number;
   quantity: number;
   totalAmount: number;
   exitPrice?: number;
-  pnlAmount?: number;
-  pnlPercentage?: number;
-  direction: 'long' | 'short';
+  direction: TradeDirection;
   stopLoss?: number;
   target?: number;
   strategy: string;
-  outcomeSummary: string;
+  outcomeSummary: OutcomeSummary;
   tradeAnalysis?: string;
   rulesFollowed?: string[];
   screenshots?: string[];
-  
+
   // Psychology Information
-  psychology: ITradePsychology;
-  
+  psychology: ITradePsychology | null;
+
   // Metadata
   createdAt: Date;
   updatedAt: Date;
@@ -38,20 +36,19 @@ export interface ITradePsychology {
 }
 
 export interface ICreateTradeRequest {
+  userId: string;
   symbol: string;
-  marketType: string;
+  marketType: MarketType;
   entryDate: string;
   entryPrice: number;
   quantity: number;
   totalAmount: number;
   exitPrice?: number;
-  pnlAmount?: number;
-  pnlPercentage?: number;
-  direction: 'long' | 'short';
+  direction: TradeDirection;
   stopLoss?: number;
   target?: number;
   strategy: string;
-  outcomeSummary: string;
+  outcomeSummary: OutcomeSummary;
   tradeAnalysis?: string;
   rulesFollowed?: string[];
   screenshots?: string[];
@@ -61,28 +58,27 @@ export interface ICreateTradeRequest {
 export interface ITradeFormData {
   // General Information
   symbol: string;
-  marketType: string;
+  marketType: MarketType;
   entryDate: string;
   entryPrice: number;
   quantity: number;
   totalAmount: number;
   exitPrice?: number;
-  pnlAmount?: number;
-  pnlPercentage?: number;
-  direction: 'long' | 'short';
+  direction: TradeDirection;
+  duration: TradeDuration;
   stopLoss?: number;
   target?: number;
   strategy: string;
-  outcomeSummary: string;
+  outcomeSummary: OutcomeSummary;
   tradeAnalysis?: string;
   rulesFollowed: string[];
   screenshots: string[];
-  
+
   // Psychology Information
   psychology: ITradePsychology;
 }
 
-export interface IModalProps {
+export interface ITradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ITradeFormData) => void;
@@ -102,7 +98,29 @@ export interface ITradingMistake {
 }
 
 // Market and strategy enums
-export type MarketType = 'indian' | 'us' | 'crypto' | 'forex' | 'commodities';
-export type TradeDirection = 'long' | 'short';
-export type TradeDuration = 'intraday' | 'swing' | 'positional';
-export type OutcomeSummary = 'profitable' | 'loss' | 'breakeven' | 'partial_profit' | 'partial_loss';
+export enum MarketType {
+  INDIAN = "indian",
+  US = "us",
+  CRYPTO = "crypto",
+  FOREX = "forex",
+  COMMODITIES = "commodities",
+}
+
+export enum TradeDirection {
+  LONG = "long",
+  SHORT = "short",
+}
+
+export enum TradeDuration {
+  INTRADAY = "intraday",
+  SWING = "swing",
+  POSITIONAL = "positional",
+}
+
+export enum OutcomeSummary {
+  PROFITABLE = "profitable",
+  LOSS = "loss",
+  BREAKEVEN = "breakeven",
+  PARTIAL_PROFIT = "partial_profit",
+  PARTIAL_LOSS = "partial_loss",
+}

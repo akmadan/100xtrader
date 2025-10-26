@@ -66,17 +66,6 @@ func main() {
 		})
 	}
 
-	// Run migrations
-	migrationRunner := data.NewMigrationRunner(db.GetConnection())
-	migrationsDir := filepath.Join(wd, "migrations")
-
-	if err := migrationRunner.RunMigrations(migrationsDir); err != nil {
-		utils.LogFatal("Failed to run migrations", map[string]interface{}{
-			"error": err.Error(),
-			"dir":   migrationsDir,
-		})
-	}
-
 	utils.LogInfo("Database initialization completed successfully")
 
 	// Test database connection
@@ -112,8 +101,7 @@ func testDatabase(db *data.DB) error {
 
 	// Test table existence
 	tables := []string{
-		"users", "trades", "trade_actions", "trade_journals",
-		"tags", "trade_tags", "trade_screenshots", "notes", "trade_setups",
+		"users", "trades", "strategies", "rules", "mistakes",
 	}
 
 	for _, table := range tables {

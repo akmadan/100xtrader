@@ -45,3 +45,26 @@ type UserSignInResponse struct {
 	LastSignIn time.Time    `json:"last_sign_in"`
 	IsNewUser  bool         `json:"is_new_user"`
 }
+
+// CreateUserRequest represents the request to create a new user
+type CreateUserRequest struct {
+	Username string `json:"username" validate:"required,min=2,max=255"`
+	Email    string `json:"email" validate:"required,email"`
+}
+
+// UpdateUserRequest represents the request to update a user
+type UpdateUserRequest struct {
+	Username string `json:"username" validate:"required,min=2,max=255"`
+	Email    string `json:"email" validate:"required,email"`
+}
+
+// GetUsersResponse represents the response for getting users
+type GetUsersResponse struct {
+	Users      []UserResponse     `json:"users"`
+	Pagination PaginationResponse `json:"pagination"`
+}
+
+// SignInRequest represents the request for user sign in
+type SignInRequest struct {
+	Username string `json:"username" validate:"required"`
+}

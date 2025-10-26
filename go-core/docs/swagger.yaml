@@ -1,110 +1,339 @@
 basePath: /
 definitions:
+  data.MarketType:
+    enum:
+    - indian
+    - us
+    - crypto
+    - forex
+    - commodities
+    type: string
+    x-enum-varnames:
+    - MarketTypeIndian
+    - MarketTypeUS
+    - MarketTypeCrypto
+    - MarketTypeForex
+    - MarketTypeCommodities
+  data.MistakeCategory:
+    enum:
+    - psychological
+    - behavioral
+    type: string
+    x-enum-varnames:
+    - MistakeCategoryPsychological
+    - MistakeCategoryBehavioral
+  data.OutcomeSummary:
+    enum:
+    - profitable
+    - loss
+    - breakeven
+    - partial_profit
+    - partial_loss
+    type: string
+    x-enum-varnames:
+    - OutcomeSummaryProfitable
+    - OutcomeSummaryLoss
+    - OutcomeSummaryBreakeven
+    - OutcomeSummaryPartialProfit
+    - OutcomeSummaryPartialLoss
+  data.RuleCategory:
+    enum:
+    - entry
+    - exit
+    - stop_loss
+    - take_profit
+    - risk_management
+    - psychology
+    - other
+    type: string
+    x-enum-varnames:
+    - RuleCategoryEntry
+    - RuleCategoryExit
+    - RuleCategoryStopLoss
+    - RuleCategoryTakeProfit
+    - RuleCategoryRiskManagement
+    - RuleCategoryPsychology
+    - RuleCategoryOther
+  data.TradeDirection:
+    enum:
+    - long
+    - short
+    type: string
+    x-enum-varnames:
+    - TradeDirectionLong
+    - TradeDirectionShort
+  dto.CreateMistakeRequest:
+    properties:
+      category:
+        $ref: '#/definitions/data.MistakeCategory'
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      user_id:
+        type: integer
+    required:
+    - category
+    - name
+    - user_id
+    type: object
+  dto.CreatePsychologyRequest:
+    properties:
+      emotional_state:
+        type: string
+      entry_confidence:
+        maximum: 10
+        minimum: 1
+        type: integer
+      lessons_learned:
+        type: string
+      mistakes_made:
+        items:
+          type: string
+        type: array
+      satisfaction_rating:
+        maximum: 10
+        minimum: 1
+        type: integer
+    required:
+    - emotional_state
+    - entry_confidence
+    - satisfaction_rating
+    type: object
+  dto.CreateRuleRequest:
+    properties:
+      category:
+        $ref: '#/definitions/data.RuleCategory'
+      description:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      user_id:
+        type: integer
+    required:
+    - category
+    - description
+    - name
+    - user_id
+    type: object
+  dto.CreateStrategyRequest:
+    properties:
+      description:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      user_id:
+        type: integer
+    required:
+    - description
+    - name
+    - user_id
+    type: object
+  dto.CreateTradeRequest:
+    properties:
+      direction:
+        $ref: '#/definitions/data.TradeDirection'
+      entry_date:
+        type: string
+      entry_price:
+        type: number
+      exit_price:
+        type: number
+      market_type:
+        $ref: '#/definitions/data.MarketType'
+      outcome_summary:
+        $ref: '#/definitions/data.OutcomeSummary'
+      psychology:
+        $ref: '#/definitions/dto.CreatePsychologyRequest'
+      quantity:
+        type: integer
+      rules_followed:
+        items:
+          type: string
+        type: array
+      screenshots:
+        items:
+          type: string
+        type: array
+      stop_loss:
+        type: number
+      strategy:
+        type: string
+      symbol:
+        type: string
+      target:
+        type: number
+      total_amount:
+        type: number
+      trade_analysis:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - direction
+    - entry_date
+    - entry_price
+    - market_type
+    - outcome_summary
+    - quantity
+    - strategy
+    - symbol
+    - total_amount
+    - user_id
+    type: object
+  dto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      username:
+        maxLength: 255
+        minLength: 2
+        type: string
+    required:
+    - email
+    - username
+    type: object
   dto.ErrorResponse:
     properties:
       code:
         type: integer
-      details:
-        additionalProperties:
-          type: string
-        type: object
       error:
         type: string
       message:
         type: string
     type: object
-  dto.NoteListResponse:
+  dto.GetMistakesResponse:
     properties:
-      notes:
+      mistakes:
         items:
-          $ref: '#/definitions/dto.NoteResponse'
+          $ref: '#/definitions/dto.MistakeResponse'
         type: array
+      pagination:
+        $ref: '#/definitions/dto.PaginationResponse'
+    type: object
+  dto.GetRulesResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.PaginationResponse'
+      rules:
+        items:
+          $ref: '#/definitions/dto.RuleResponse'
+        type: array
+    type: object
+  dto.GetStrategiesResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.PaginationResponse'
+      strategies:
+        items:
+          $ref: '#/definitions/dto.StrategyResponse'
+        type: array
+    type: object
+  dto.GetTradesResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.PaginationResponse'
+      trades:
+        items:
+          $ref: '#/definitions/dto.TradeResponse'
+        type: array
+    type: object
+  dto.GetUsersResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/dto.PaginationResponse'
+      users:
+        items:
+          $ref: '#/definitions/dto.UserResponse'
+        type: array
+    type: object
+  dto.MistakeResponse:
+    properties:
+      category:
+        $ref: '#/definitions/data.MistakeCategory'
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dto.PaginationResponse:
+    properties:
+      count:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
       total:
         type: integer
     type: object
-  dto.NoteRequest:
+  dto.PsychologyResponse:
     properties:
-      day:
+      emotional_state:
         type: string
-      market_condition:
-        enum:
-        - up
-        - down
-        - sideways
+      entry_confidence:
+        type: integer
+      lessons_learned:
         type: string
-      market_volatility:
-        enum:
-        - high
-        - medium
-        - low
+      mistakes_made:
+        items:
+          type: string
+        type: array
+      satisfaction_rating:
+        type: integer
+    type: object
+  dto.RuleResponse:
+    properties:
+      category:
+        $ref: '#/definitions/data.RuleCategory'
+      created_at:
         type: string
-      mood:
-        enum:
-        - excited
-        - neutral
-        - low
+      description:
         type: string
-      notes:
+      id:
         type: string
-      summary:
+      name:
+        type: string
+      updated_at:
         type: string
       user_id:
-        minimum: 1
         type: integer
-    required:
-    - day
-    - market_condition
-    - market_volatility
-    - mood
-    - user_id
     type: object
-  dto.NoteResponse:
+  dto.SignInRequest:
+    properties:
+      username:
+        type: string
+    required:
+    - username
+    type: object
+  dto.StrategyResponse:
     properties:
       created_at:
         type: string
-      day:
+      description:
         type: string
       id:
-        type: integer
-      market_condition:
         type: string
-      market_volatility:
+      name:
         type: string
-      mood:
-        type: string
-      notes:
-        type: string
-      summary:
+      updated_at:
         type: string
       user_id:
         type: integer
-    type: object
-  dto.NoteUpdateRequest:
-    properties:
-      day:
-        type: string
-      market_condition:
-        enum:
-        - up
-        - down
-        - sideways
-        type: string
-      market_volatility:
-        enum:
-        - high
-        - medium
-        - low
-        type: string
-      mood:
-        enum:
-        - excited
-        - neutral
-        - low
-        type: string
-      notes:
-        type: string
-      summary:
-        type: string
     type: object
   dto.SuccessResponse:
     properties:
@@ -112,415 +341,180 @@ definitions:
       message:
         type: string
     type: object
-  dto.TagListResponse:
-    properties:
-      tags:
-        items:
-          $ref: '#/definitions/dto.TagResponse'
-        type: array
-      total:
-        type: integer
-    type: object
-  dto.TagRequest:
-    properties:
-      name:
-        maxLength: 100
-        minLength: 1
-        type: string
-    required:
-    - name
-    type: object
-  dto.TagResponse:
+  dto.TradeResponse:
     properties:
       created_at:
         type: string
-      id:
-        type: integer
-      name:
+      direction:
+        $ref: '#/definitions/data.TradeDirection'
+      entry_date:
         type: string
-    type: object
-  dto.TagTradeRequest:
-    properties:
-      tag_id:
-        minimum: 1
-        type: integer
-      trade_id:
-        type: string
-    required:
-    - tag_id
-    - trade_id
-    type: object
-  dto.TradeActionCreateRequest:
-    properties:
-      action:
-        enum:
-        - buy
-        - sell
-        type: string
-      fee:
-        minimum: 0
+      entry_price:
         type: number
-      price:
-        type: number
-      quantity:
-        type: integer
-      trade_id:
-        type: string
-      trade_time:
-        type: string
-    required:
-    - action
-    - price
-    - quantity
-    - trade_id
-    - trade_time
-    type: object
-  dto.TradeActionRequest:
-    properties:
-      action:
-        enum:
-        - buy
-        - sell
-        type: string
-      fee:
-        minimum: 0
-        type: number
-      price:
-        type: number
-      quantity:
-        type: integer
-      trade_time:
-        type: string
-    required:
-    - action
-    - price
-    - quantity
-    - trade_time
-    type: object
-  dto.TradeActionResponse:
-    properties:
-      action:
-        type: string
-      created_at:
-        type: string
-      fee:
+      exit_price:
         type: number
       id:
-        type: integer
-      price:
-        type: number
+        type: string
+      market_type:
+        $ref: '#/definitions/data.MarketType'
+      outcome_summary:
+        $ref: '#/definitions/data.OutcomeSummary'
+      psychology:
+        $ref: '#/definitions/dto.PsychologyResponse'
       quantity:
         type: integer
-      trade_id:
-        type: string
-      trade_time:
-        type: string
-    type: object
-  dto.TradeCreateRequest:
-    properties:
-      actions:
-        description: Optional trade actions (buy/sell)
-        items:
-          $ref: '#/definitions/dto.TradeActionCreateRequest'
-        type: array
-      journal:
-        allOf:
-        - $ref: '#/definitions/dto.TradeJournalCreateRequest'
-        description: Optional journal entry
-      market:
-        enum:
-        - stock
-        - option
-        - crypto
-        - futures
-        - forex
-        - index
-        type: string
-      stoploss:
-        type: number
-      symbol:
-        maxLength: 50
-        minLength: 1
-        type: string
-      tags:
-        description: Optional tags for the trade
+      rules_followed:
         items:
           type: string
         type: array
-      target:
-        type: number
-      user_id:
-        minimum: 1
-        type: integer
-    required:
-    - market
-    - stoploss
-    - symbol
-    - target
-    - user_id
-    type: object
-  dto.TradeJournalCreateRequest:
-    properties:
-      confidence:
-        maximum: 10
-        minimum: 0
-        type: integer
-      notes:
-        minLength: 1
-        type: string
-      trade_id:
-        description: Optional when embedded in trade creation
-        type: string
-    required:
-    - confidence
-    - notes
-    type: object
-  dto.TradeJournalRequest:
-    properties:
-      confidence:
-        maximum: 10
-        minimum: 0
-        type: integer
-      notes:
-        minLength: 1
-        type: string
-    required:
-    - confidence
-    - notes
-    type: object
-  dto.TradeJournalResponse:
-    properties:
-      confidence:
-        type: integer
-      created_at:
-        type: string
-      id:
-        type: integer
-      notes:
-        type: string
       screenshots:
         items:
-          $ref: '#/definitions/dto.TradeScreenshotResponse'
+          type: string
         type: array
-      trade_id:
-        type: string
-    type: object
-  dto.TradeListResponse:
-    properties:
-      total:
-        type: integer
-      trades:
-        items:
-          $ref: '#/definitions/dto.TradeResponse'
-        type: array
-    type: object
-  dto.TradeResponse:
-    properties:
-      actions:
-        description: Trade actions (buy/sell)
-        items:
-          $ref: '#/definitions/dto.TradeActionResponse'
-        type: array
-      created_at:
-        type: string
-      id:
-        type: string
-      journal:
-        allOf:
-        - $ref: '#/definitions/dto.TradeJournalResponse'
-        description: Optional journal data
-      market:
-        type: string
-      screenshots:
-        description: Screenshots in journal
-        items:
-          $ref: '#/definitions/dto.TradeScreenshotResponse'
-        type: array
-      stoploss:
+      stop_loss:
         type: number
+      strategy:
+        type: string
       symbol:
         type: string
-      tags:
-        description: Tags associated with trade
-        items:
-          $ref: '#/definitions/dto.TagResponse'
-        type: array
       target:
         type: number
+      total_amount:
+        type: number
+      trade_analysis:
+        type: string
+      updated_at:
+        type: string
       user_id:
         type: integer
     type: object
-  dto.TradeScreenshotRequest:
+  dto.UpdateMistakeRequest:
     properties:
-      url:
-        type: string
-    required:
-    - url
-    type: object
-  dto.TradeScreenshotResponse:
-    properties:
-      created_at:
-        type: string
+      category:
+        $ref: '#/definitions/data.MistakeCategory'
       id:
-        type: integer
-      trade_journal_id:
-        type: integer
-      url:
-        type: string
-    type: object
-  dto.TradeSetupListResponse:
-    properties:
-      setups:
-        items:
-          $ref: '#/definitions/dto.TradeSetupResponse'
-        type: array
-      total:
-        type: integer
-    type: object
-  dto.TradeSetupRequest:
-    properties:
-      entry:
-        type: number
-      market:
-        enum:
-        - stock
-        - option
-        - crypto
-        - futures
-        - forex
-        - index
-        type: string
-      note:
-        type: string
-      risk_reward_ratio:
-        minimum: 0
-        type: number
-      side:
-        enum:
-        - long
-        - short
-        type: string
-      stoploss:
-        type: number
-      symbol:
-        maxLength: 50
-        minLength: 1
-        type: string
-      target:
-        type: number
-      user_id:
-        minimum: 1
-        type: integer
-    required:
-    - entry
-    - market
-    - side
-    - stoploss
-    - symbol
-    - target
-    - user_id
-    type: object
-  dto.TradeSetupResponse:
-    properties:
-      created_at:
-        type: string
-      entry:
-        type: number
-      id:
-        type: integer
-      market:
-        type: string
-      note:
-        type: string
-      risk_reward_ratio:
-        type: number
-      side:
-        type: string
-      stoploss:
-        type: number
-      symbol:
-        type: string
-      target:
-        type: number
-      user_id:
-        type: integer
-    type: object
-  dto.TradeSetupUpdateRequest:
-    properties:
-      entry:
-        type: number
-      market:
-        enum:
-        - stock
-        - option
-        - crypto
-        - futures
-        - forex
-        - index
-        type: string
-      note:
-        type: string
-      risk_reward_ratio:
-        minimum: 0
-        type: number
-      side:
-        enum:
-        - long
-        - short
-        type: string
-      stoploss:
-        type: number
-      symbol:
-        maxLength: 50
-        minLength: 1
-        type: string
-      target:
-        type: number
-    type: object
-  dto.TradeUpdateRequest:
-    properties:
-      market:
-        enum:
-        - stock
-        - option
-        - crypto
-        - futures
-        - forex
-        - index
-        type: string
-      stoploss:
-        type: number
-      symbol:
-        maxLength: 50
-        minLength: 1
-        type: string
-      target:
-        type: number
-    type: object
-  dto.UserCreateRequest:
-    properties:
-      email:
         type: string
       name:
         maxLength: 255
-        minLength: 2
+        minLength: 1
         type: string
-      phone:
-        maxLength: 20
-        minLength: 10
+      user_id:
+        type: integer
+    required:
+    - category
+    - id
+    - name
+    - user_id
+    type: object
+  dto.UpdateRuleRequest:
+    properties:
+      category:
+        $ref: '#/definitions/data.RuleCategory'
+      description:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      user_id:
+        type: integer
+    required:
+    - category
+    - description
+    - id
+    - name
+    - user_id
+    type: object
+  dto.UpdateStrategyRequest:
+    properties:
+      description:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      user_id:
+        type: integer
+    required:
+    - description
+    - id
+    - name
+    - user_id
+    type: object
+  dto.UpdateTradeRequest:
+    properties:
+      direction:
+        $ref: '#/definitions/data.TradeDirection'
+      entry_date:
+        type: string
+      entry_price:
+        type: number
+      exit_price:
+        type: number
+      id:
+        type: string
+      market_type:
+        $ref: '#/definitions/data.MarketType'
+      outcome_summary:
+        $ref: '#/definitions/data.OutcomeSummary'
+      psychology:
+        $ref: '#/definitions/dto.CreatePsychologyRequest'
+      quantity:
+        type: integer
+      rules_followed:
+        items:
+          type: string
+        type: array
+      screenshots:
+        items:
+          type: string
+        type: array
+      stop_loss:
+        type: number
+      strategy:
+        type: string
+      symbol:
+        type: string
+      target:
+        type: number
+      total_amount:
+        type: number
+      trade_analysis:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - direction
+    - entry_date
+    - entry_price
+    - id
+    - market_type
+    - outcome_summary
+    - quantity
+    - strategy
+    - symbol
+    - total_amount
+    - user_id
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      username:
+        maxLength: 255
+        minLength: 2
         type: string
     required:
     - email
-    - name
-    type: object
-  dto.UserListResponse:
-    properties:
-      total:
-        type: integer
-      users:
-        items:
-          $ref: '#/definitions/dto.UserResponse'
-        type: array
+    - username
     type: object
   dto.UserResponse:
     properties:
@@ -535,35 +529,6 @@ definitions:
       name:
         type: string
       phone:
-        type: string
-    type: object
-  dto.UserSignInRequest:
-    properties:
-      email:
-        type: string
-    required:
-    - email
-    type: object
-  dto.UserSignInResponse:
-    properties:
-      is_new_user:
-        type: boolean
-      last_sign_in:
-        type: string
-      user:
-        $ref: '#/definitions/dto.UserResponse'
-    type: object
-  dto.UserUpdateRequest:
-    properties:
-      email:
-        type: string
-      name:
-        maxLength: 255
-        minLength: 2
-        type: string
-      phone:
-        maxLength: 20
-        minLength: 10
         type: string
     type: object
 host: localhost:8080
@@ -581,47 +546,65 @@ info:
   title: 100xTrader API
   version: "1.0"
 paths:
-  /api/v1/notes:
+  /api/v1/mistakes:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all notes
+      description: Retrieve a paginated list of mistakes
+      parameters:
+      - description: 'Number of mistakes to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of mistakes to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Notes retrieved successfully
-          schema:
-            $ref: '#/definitions/dto.NoteListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: List notes
-      tags:
-      - notes
-    post:
-      consumes:
-      - application/json
-      description: Create a new note for a user
-      parameters:
-      - description: Note data
-        in: body
-        name: note
-        required: true
-        schema:
-          $ref: '#/definitions/dto.NoteRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Note created successfully
+          description: Mistakes retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.NoteResponse'
+                  $ref: '#/definitions/dto.GetMistakesResponse'
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List mistakes
+      tags:
+      - mistakes
+    post:
+      consumes:
+      - application/json
+      description: Create a new trading mistake
+      parameters:
+      - description: Mistake data
+        in: body
+        name: mistake
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMistakeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Mistake created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MistakeResponse'
               type: object
         "400":
           description: Invalid request data
@@ -631,16 +614,16 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create note
+      summary: Create a new mistake
       tags:
-      - notes
-  /api/v1/notes/{id}:
+      - mistakes
+  /api/v1/mistakes/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a note
+      description: Delete a specific mistake by ID
       parameters:
-      - description: Note ID
+      - description: Mistake ID
         in: path
         name: id
         required: true
@@ -649,26 +632,30 @@ paths:
       - application/json
       responses:
         "200":
-          description: Note deleted successfully
+          description: Mistake deleted successfully
           schema:
             $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Invalid mistake ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
-          description: Note not found
+          description: Mistake not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete note
+      summary: Delete a mistake
       tags:
-      - notes
+      - mistakes
     get:
       consumes:
       - application/json
-      description: Retrieve a specific note by ID
+      description: Retrieve a specific mistake with all its details
       parameters:
-      - description: Note ID
+      - description: Mistake ID
         in: path
         name: id
         required: true
@@ -677,167 +664,221 @@ paths:
       - application/json
       responses:
         "200":
-          description: Note retrieved successfully
+          description: Mistake retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.NoteResponse'
+                  $ref: '#/definitions/dto.MistakeResponse'
               type: object
+        "400":
+          description: Invalid mistake ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
-          description: Note not found
+          description: Mistake not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get note
+      summary: Get a mistake by ID
       tags:
-      - notes
+      - mistakes
     put:
       consumes:
       - application/json
-      description: Update an existing note
+      description: Update an existing mistake with new data
       parameters:
-      - description: Note ID
+      - description: Mistake ID
         in: path
         name: id
         required: true
         type: string
-      - description: Note update data
+      - description: Updated mistake data
         in: body
-        name: note
+        name: mistake
         required: true
         schema:
-          $ref: '#/definitions/dto.NoteUpdateRequest'
+          $ref: '#/definitions/dto.UpdateMistakeRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Note updated successfully
+          description: Mistake updated successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.NoteResponse'
+                  $ref: '#/definitions/dto.MistakeResponse'
               type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "404":
-          description: Note not found
+          description: Mistake not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update note
+      summary: Update a mistake
       tags:
-      - notes
-  /api/v1/notes/user/{user_id}:
+      - mistakes
+  /api/v1/mistakes/user/{user_id}:
     get:
       consumes:
       - application/json
-      description: Retrieve all notes for a specific user
+      description: Retrieve a paginated list of mistakes for a specific user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
+      - description: 'Number of mistakes to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of mistakes to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Notes retrieved successfully
+          description: User mistakes retrieved successfully
           schema:
-            $ref: '#/definitions/dto.NoteListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetMistakesResponse'
+              type: object
         "400":
-          description: Invalid user ID
+          description: Invalid user ID or query parameters
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get notes by user
+      summary: Get mistakes by user
       tags:
-      - notes
-  /api/v1/notes/user/{user_id}/daily:
+      - mistakes
+  /api/v1/mistakes/user/{user_id}/category/{category}:
     get:
       consumes:
       - application/json
-      description: Retrieve daily notes for a specific user
+      description: Retrieve a paginated list of mistakes filtered by category for
+        a specific user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
+      - description: Mistake category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: 'Number of mistakes to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of mistakes to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Daily notes retrieved successfully
+          description: User mistakes by category retrieved successfully
           schema:
-            $ref: '#/definitions/dto.NoteListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetMistakesResponse'
+              type: object
         "400":
-          description: Invalid user ID
+          description: Invalid user ID, category, or query parameters
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get daily notes
+      summary: Get mistakes by category
       tags:
-      - notes
-  /api/v1/tags:
+      - mistakes
+  /api/v1/rules:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all tags
+      description: Retrieve a paginated list of rules
+      parameters:
+      - description: 'Number of rules to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of rules to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Tags retrieved successfully
+          description: Rules retrieved successfully
           schema:
-            $ref: '#/definitions/dto.TagListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetRulesResponse'
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: List tags
+      summary: List rules
       tags:
-      - tags
+      - rules
     post:
       consumes:
       - application/json
-      description: Create a new tag
+      description: Create a new trading rule
       parameters:
-      - description: Tag data
+      - description: Rule data
         in: body
-        name: tag
+        name: rule
         required: true
         schema:
-          $ref: '#/definitions/dto.TagRequest'
+          $ref: '#/definitions/dto.CreateRuleRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Tag created successfully
+          description: Rule created successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.TagResponse'
+                  $ref: '#/definitions/dto.RuleResponse'
               type: object
         "400":
           description: Invalid request data
@@ -847,324 +888,464 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create tag
+      summary: Create a new rule
       tags:
-      - tags
-  /api/v1/tags/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a specific tag by ID
-      parameters:
-      - description: Tag ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tag retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.TagResponse'
-              type: object
-        "404":
-          description: Tag not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get tag
-      tags:
-      - tags
-  /api/v1/tags/trade:
-    post:
-      consumes:
-      - application/json
-      description: Add a tag to an existing trade
-      parameters:
-      - description: Tag and trade association data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TagTradeRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tag added to trade successfully
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Tag or trade not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Add tag to trade
-      tags:
-      - tags
-  /api/v1/tags/trade/{trade_id}/{tag_id}:
+      - rules
+  /api/v1/rules/{id}:
     delete:
       consumes:
       - application/json
-      description: Remove a tag from a trade
+      description: Delete a specific rule by ID
       parameters:
-      - description: Trade ID
+      - description: Rule ID
         in: path
-        name: trade_id
-        required: true
-        type: string
-      - description: Tag ID
-        in: path
-        name: tag_id
+        name: id
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Tag removed from trade successfully
+          description: Rule deleted successfully
           schema:
             $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Invalid rule ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
-          description: Tag or trade not found
+          description: Rule not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Remove tag from trade
+      summary: Delete a rule
       tags:
-      - tags
-  /api/v1/trade-setups:
+      - rules
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all trade setups
+      description: Retrieve a specific rule with all its details
+      parameters:
+      - description: Rule ID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Setups retrieved successfully
-          schema:
-            $ref: '#/definitions/dto.TradeSetupListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: List trade setups
-      tags:
-      - trade-setups
-    post:
-      consumes:
-      - application/json
-      description: Create a new trade setup with market analysis
-      parameters:
-      - description: Trade setup data
-        in: body
-        name: setup
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TradeSetupRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Setup created successfully
+          description: Rule retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.TradeSetupResponse'
+                  $ref: '#/definitions/dto.RuleResponse'
               type: object
         "400":
-          description: Invalid request data
+          description: Invalid rule ID
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create trade setup
-      tags:
-      - trade-setups
-  /api/v1/trade-setups/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a trade setup
-      parameters:
-      - description: Setup ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Setup deleted successfully
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
         "404":
-          description: Setup not found
+          description: Rule not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete trade setup
+      summary: Get a rule by ID
       tags:
-      - trade-setups
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a specific trade setup by ID
-      parameters:
-      - description: Setup ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Setup retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.TradeSetupResponse'
-              type: object
-        "404":
-          description: Setup not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get trade setup
-      tags:
-      - trade-setups
+      - rules
     put:
       consumes:
       - application/json
-      description: Update an existing trade setup
+      description: Update an existing rule with new data
       parameters:
-      - description: Setup ID
+      - description: Rule ID
         in: path
         name: id
         required: true
         type: string
-      - description: Setup update data
+      - description: Updated rule data
         in: body
-        name: setup
+        name: rule
         required: true
         schema:
-          $ref: '#/definitions/dto.TradeSetupUpdateRequest'
+          $ref: '#/definitions/dto.UpdateRuleRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Setup updated successfully
+          description: Rule updated successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.TradeSetupResponse'
+                  $ref: '#/definitions/dto.RuleResponse'
               type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "404":
-          description: Setup not found
+          description: Rule not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update trade setup
+      summary: Update a rule
       tags:
-      - trade-setups
-  /api/v1/trade-setups/user/{user_id}:
+      - rules
+  /api/v1/rules/user/{user_id}:
     get:
       consumes:
       - application/json
-      description: Retrieve all trade setups for a specific user
+      description: Retrieve a paginated list of rules for a specific user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
+      - description: 'Number of rules to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of rules to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Setups retrieved successfully
+          description: User rules retrieved successfully
           schema:
-            $ref: '#/definitions/dto.TradeSetupListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetRulesResponse'
+              type: object
         "400":
-          description: Invalid user ID
+          description: Invalid user ID or query parameters
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get setups by user
+      summary: Get rules by user
       tags:
-      - trade-setups
+      - rules
+  /api/v1/rules/user/{user_id}/category/{category}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of rules filtered by category for a specific
+        user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Rule category
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: 'Number of rules to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of rules to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User rules by category retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetRulesResponse'
+              type: object
+        "400":
+          description: Invalid user ID, category, or query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get rules by category
+      tags:
+      - rules
+  /api/v1/strategies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of strategies
+      parameters:
+      - description: 'Number of strategies to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of strategies to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Strategies retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetStrategiesResponse'
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List strategies
+      tags:
+      - strategies
+    post:
+      consumes:
+      - application/json
+      description: Create a new trading strategy
+      parameters:
+      - description: Strategy data
+        in: body
+        name: strategy
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateStrategyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Strategy created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.StrategyResponse'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new strategy
+      tags:
+      - strategies
+  /api/v1/strategies/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific strategy by ID
+      parameters:
+      - description: Strategy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Strategy deleted successfully
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Invalid strategy ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Strategy not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a strategy
+      tags:
+      - strategies
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific strategy with all its details
+      parameters:
+      - description: Strategy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Strategy retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.StrategyResponse'
+              type: object
+        "400":
+          description: Invalid strategy ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Strategy not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a strategy by ID
+      tags:
+      - strategies
+    put:
+      consumes:
+      - application/json
+      description: Update an existing strategy with new data
+      parameters:
+      - description: Strategy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated strategy data
+        in: body
+        name: strategy
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStrategyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Strategy updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.StrategyResponse'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Strategy not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a strategy
+      tags:
+      - strategies
+  /api/v1/strategies/user/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of strategies for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: 'Number of strategies to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of strategies to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User strategies retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetStrategiesResponse'
+              type: object
+        "400":
+          description: Invalid user ID or query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get strategies by user
+      tags:
+      - strategies
   /api/v1/trades:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of trades with optional filtering by user_id, market,
-        and include_journal
+      description: Retrieve a paginated list of trades
       parameters:
-      - description: Filter by user ID
+      - description: 'Number of trades to return (default: 10, max: 100)'
         in: query
-        name: user_id
+        name: limit
         type: integer
-      - description: Filter by market type
+      - description: 'Number of trades to skip (default: 0)'
         in: query
-        name: market
-        type: string
-      - description: Include journal data in response
-        in: query
-        name: include_journal
-        type: boolean
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Trades retrieved successfully
           schema:
-            $ref: '#/definitions/dto.TradeListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetTradesResponse'
+              type: object
         "400":
           description: Invalid query parameters
           schema:
@@ -1179,15 +1360,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new trade with optional journal entry, trade actions,
-        and tags
+      description: Create a new trade with all required and optional fields
       parameters:
-      - description: Trade creation data
+      - description: Trade data
         in: body
         name: trade
         required: true
         schema:
-          $ref: '#/definitions/dto.TradeCreateRequest'
+          $ref: '#/definitions/dto.CreateTradeRequest'
       produces:
       - application/json
       responses:
@@ -1215,7 +1395,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a trade and all its associated data
+      description: Delete a specific trade by ID
       parameters:
       - description: Trade ID
         in: path
@@ -1229,6 +1409,10 @@ paths:
           description: Trade deleted successfully
           schema:
             $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Invalid trade ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Trade not found
           schema:
@@ -1237,14 +1421,13 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete trade
+      summary: Delete a trade
       tags:
       - trades
     get:
       consumes:
       - application/json
-      description: Retrieve a specific trade with its journal, actions, tags, and
-        screenshots
+      description: Retrieve a specific trade with all its details
       parameters:
       - description: Trade ID
         in: path
@@ -1263,6 +1446,10 @@ paths:
                 data:
                   $ref: '#/definitions/dto.TradeResponse'
               type: object
+        "400":
+          description: Invalid trade ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Trade not found
           schema:
@@ -1271,7 +1458,7 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get trade by ID
+      summary: Get a trade by ID
       tags:
       - trades
     put:
@@ -1284,12 +1471,12 @@ paths:
         name: id
         required: true
         type: string
-      - description: Trade update data
+      - description: Updated trade data
         in: body
         name: trade
         required: true
         schema:
-          $ref: '#/definitions/dto.TradeUpdateRequest'
+          $ref: '#/definitions/dto.UpdateTradeRequest'
       produces:
       - application/json
       responses:
@@ -1314,195 +1501,42 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update trade
-      tags:
-      - trades
-  /api/v1/trades/{id}/actions:
-    post:
-      consumes:
-      - application/json
-      description: Add a new action to an existing trade
-      parameters:
-      - description: Trade ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Trade action data
-        in: body
-        name: action
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TradeActionRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Action added successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.TradeActionResponse'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Trade not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Add trade action
-      tags:
-      - trades
-  /api/v1/trades/{id}/actions/{action_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a specific action from a trade
-      parameters:
-      - description: Trade ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Action ID
-        in: path
-        name: action_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Action removed successfully
-          schema:
-            $ref: '#/definitions/dto.SuccessResponse'
-        "404":
-          description: Trade or action not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Remove trade action
-      tags:
-      - trades
-  /api/v1/trades/{id}/journal:
-    post:
-      consumes:
-      - application/json
-      description: Update or create a journal entry for a trade
-      parameters:
-      - description: Trade ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Journal data
-        in: body
-        name: journal
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TradeJournalRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Journal updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.TradeJournalResponse'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Trade not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update trade journal
-      tags:
-      - trades
-  /api/v1/trades/{id}/screenshots:
-    post:
-      consumes:
-      - application/json
-      description: Add a screenshot to a trade journal
-      parameters:
-      - description: Trade ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Screenshot data
-        in: body
-        name: screenshot
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TradeScreenshotRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Screenshot added successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.TradeScreenshotResponse'
-              type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Trade not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Add screenshot
+      summary: Update a trade
       tags:
       - trades
   /api/v1/trades/user/{user_id}:
     get:
       consumes:
       - application/json
-      description: Retrieve all trades for a specific user
+      description: Retrieve a paginated list of trades for a specific user
       parameters:
       - description: User ID
         in: path
         name: user_id
         required: true
         type: integer
+      - description: 'Number of trades to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of trades to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Trades retrieved successfully
+          description: User trades retrieved successfully
           schema:
-            $ref: '#/definitions/dto.TradeListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetTradesResponse'
+              type: object
         "400":
-          description: Invalid user ID
+          description: Invalid user ID or query parameters
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
@@ -1516,32 +1550,50 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all users in the system
+      description: Retrieve a paginated list of users
+      parameters:
+      - description: 'Number of users to return (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of users to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Users retrieved successfully
           schema:
-            $ref: '#/definitions/dto.UserListResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetUsersResponse'
+              type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: List all users
+      summary: List users
       tags:
       - users
     post:
       consumes:
       - application/json
-      description: Create a new user account with name, email, and optional phone
+      description: Create a new user account
       parameters:
-      - description: User creation data
+      - description: User data
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/dto.UserCreateRequest'
+          $ref: '#/definitions/dto.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -1569,13 +1621,13 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a user
+      description: Delete a specific user by ID
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1595,19 +1647,19 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete user
+      summary: Delete a user
       tags:
       - users
     get:
       consumes:
       - application/json
-      description: Retrieve a specific user by their ID
+      description: Retrieve a specific user with all its details
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1632,25 +1684,25 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get user by ID
+      summary: Get a user by ID
       tags:
       - users
     put:
       consumes:
       - application/json
-      description: Update an existing user
+      description: Update an existing user with new data
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
-        type: integer
-      - description: User update data
+        type: string
+      - description: Updated user data
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/dto.UserUpdateRequest'
+          $ref: '#/definitions/dto.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -1675,39 +1727,39 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update user
+      summary: Update a user
       tags:
       - users
   /api/v1/users/signin:
     post:
       consumes:
       - application/json
-      description: Sign in a user with email
+      description: Authenticate user and return user data
       parameters:
-      - description: Sign in credentials
+      - description: User credentials
         in: body
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/dto.UserSignInRequest'
+          $ref: '#/definitions/dto.SignInRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Sign in successful
+          description: User signed in successfully
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.UserSignInResponse'
+                  $ref: '#/definitions/dto.UserResponse'
               type: object
         "400":
-          description: Invalid request data
+          description: Invalid credentials
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "401":
-          description: Invalid credentials
+          description: Unauthorized
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":

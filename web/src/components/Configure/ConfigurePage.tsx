@@ -34,7 +34,7 @@ function AddStrategyModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onCl
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-60 modal-backdrop flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div 
@@ -120,7 +120,7 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-60 modal-backdrop flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div 
@@ -221,7 +221,7 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-60 modal-backdrop flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div 
@@ -440,27 +440,27 @@ export default function ConfigurePage() {
           <h1 className="text-3xl font-helvetica-bold text-primary">Configure</h1>
           <p className="text-secondary font-helvetica mt-1">Manage your trading strategies, rules, and mistakes</p>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex space-x-1 mb-6 bg-secondary p-1 rounded-lg">
-        {tabs.map((tab) => {
-          const IconComponent = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md font-helvetica-medium transition-colors duration-200 ${
-                activeTab === tab.id
-                  ? "bg-primary text-secondary"
-                  : "text-tertiary hover:text-primary hover:bg-tertiary"
-              }`}
-            >
-              <IconComponent className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+        
+        {/* Tabs */}
+        <div className="flex space-x-1 bg-primary p-1 rounded-lg">
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md font-helvetica-medium transition-colors duration-200 ${
+                  activeTab === tab.id
+                    ? "bg-primary text-secondary"
+                    : "text-tertiary hover:text-primary hover:bg-tertiary"
+                }`}
+              >
+                <IconComponent className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Content */}

@@ -90,42 +90,50 @@ func (s *Server) setupRoutes() {
 			users.POST("/signin", handlers.SignInUser(s.db))
 		}
 
-		// Trade routes (includes optional journal and actions)
+		// Trade routes
 		trades := v1.Group("/trades")
 		{
-			trades.POST("", handlers.CreateTrade(s.db))                  // Create trade with optional journal and actions
-			trades.GET("/:id", handlers.GetTrade(s.db))                  // Get trade with journal and actions
-			trades.PUT("/:id", handlers.UpdateTrade(s.db))               // Update trade with journal and actions
+			trades.POST("", handlers.CreateTrade(s.db))                  // Create trade
+			trades.GET("/:id", handlers.GetTrade(s.db))                  // Get trade
+			trades.PUT("/:id", handlers.UpdateTrade(s.db))               // Update trade
 			trades.DELETE("/:id", handlers.DeleteTrade(s.db))            // Delete trade
-			trades.GET("", handlers.ListTrades(s.db))                    // List trades with optional journal data
+			trades.GET("", handlers.ListTrades(s.db))                    // List trades
 			trades.GET("/user/:user_id", handlers.GetTradesByUser(s.db)) // Get user's trades
-
-			// Trade-specific sub-resources
-			trades.POST("/:id/actions", handlers.AddTradeAction(s.db))                 // Add action to existing trade
-			trades.DELETE("/:id/actions/:action_id", handlers.RemoveTradeAction(s.db)) // Remove action from trade
-			trades.POST("/:id/journal", handlers.UpdateTradeJournal(s.db))             // Update journal for trade
-			trades.POST("/:id/screenshots", handlers.AddScreenshot(s.db))              // Add screenshot to trade journal
 		}
 
-		// Trade Setup routes
-		setups := v1.Group("/trade-setups")
+		// Strategy routes
+		strategies := v1.Group("/strategies")
 		{
-			setups.POST("", handlers.CreateTradeSetup(s.db))
-			setups.GET("/:id", handlers.GetTradeSetup(s.db))
-			setups.PUT("/:id", handlers.UpdateTradeSetup(s.db))
-			setups.DELETE("/:id", handlers.DeleteTradeSetup(s.db))
-			setups.GET("", handlers.ListTradeSetups(s.db))
-			setups.GET("/user/:user_id", handlers.GetSetupsByUser(s.db))
+			strategies.POST("", handlers.CreateStrategy(s.db))                   // Create strategy
+			strategies.GET("/:id", handlers.GetStrategy(s.db))                   // Get strategy
+			strategies.PUT("/:id", handlers.UpdateStrategy(s.db))                // Update strategy
+			strategies.DELETE("/:id", handlers.DeleteStrategy(s.db))             // Delete strategy
+			strategies.GET("", handlers.ListStrategies(s.db))                    // List strategies
+			strategies.GET("/user/:user_id", handlers.GetStrategiesByUser(s.db)) // Get user's strategies
 		}
 
-		// Tags routes
-		tags := v1.Group("/tags")
+		// Rule routes
+		rules := v1.Group("/rules")
 		{
-			tags.POST("", handlers.CreateTag(s.db))
-			tags.GET("/:id", handlers.GetTag(s.db))
-			tags.GET("", handlers.ListTags(s.db))
-			tags.POST("/trade", handlers.AddTagToTrade(s.db))
-			tags.DELETE("/trade/:trade_id/:tag_id", handlers.RemoveTagFromTrade(s.db))
+			rules.POST("", handlers.CreateRule(s.db))                                         // Create rule
+			rules.GET("/:id", handlers.GetRule(s.db))                                         // Get rule
+			rules.PUT("/:id", handlers.UpdateRule(s.db))                                      // Update rule
+			rules.DELETE("/:id", handlers.DeleteRule(s.db))                                   // Delete rule
+			rules.GET("", handlers.ListRules(s.db))                                           // List rules
+			rules.GET("/user/:user_id", handlers.GetRulesByUser(s.db))                        // Get user's rules
+			rules.GET("/user/:user_id/category/:category", handlers.GetRulesByCategory(s.db)) // Get user's rules by category
+		}
+
+		// Mistake routes
+		mistakes := v1.Group("/mistakes")
+		{
+			mistakes.POST("", handlers.CreateMistake(s.db))                                         // Create mistake
+			mistakes.GET("/:id", handlers.GetMistake(s.db))                                         // Get mistake
+			mistakes.PUT("/:id", handlers.UpdateMistake(s.db))                                      // Update mistake
+			mistakes.DELETE("/:id", handlers.DeleteMistake(s.db))                                   // Delete mistake
+			mistakes.GET("", handlers.ListMistakes(s.db))                                           // List mistakes
+			mistakes.GET("/user/:user_id", handlers.GetMistakesByUser(s.db))                        // Get user's mistakes
+			mistakes.GET("/user/:user_id/category/:category", handlers.GetMistakesByCategory(s.db)) // Get user's mistakes by category
 		}
 	}
 }

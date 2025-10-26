@@ -188,3 +188,23 @@ func LogTrade(operation, tradeID, symbol string, userID int, fields ...logrus.Fi
 
 	entry.Info("Trade operation")
 }
+
+// GenerateID generates a unique ID
+func GenerateID() string {
+	return time.Now().Format("20060102150405") + "-" + randomString(8)
+}
+
+// GetCurrentTime returns the current time
+func GetCurrentTime() time.Time {
+	return time.Now()
+}
+
+// randomString generates a random string of specified length
+func randomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[time.Now().UnixNano()%int64(len(charset))]
+	}
+	return string(b)
+}

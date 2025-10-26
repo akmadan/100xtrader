@@ -16,137 +16,124 @@ type User struct {
 
 // Trade represents a trading position
 type Trade struct {
-	ID        string    `json:"id" db:"id"`
-	UserID    int       `json:"user_id" db:"user_id"`
-	Market    string    `json:"market" db:"market"` // stock, option, crypto, futures, forex, index
-	Symbol    string    `json:"symbol" db:"symbol"`
-	Target    float64   `json:"target" db:"target"`
-	StopLoss  float64   `json:"stoploss" db:"stoploss"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ID             string           `json:"id" db:"id"`
+	UserID         int              `json:"user_id" db:"user_id"`
+	Symbol         string           `json:"symbol" db:"symbol"`
+	MarketType     MarketType       `json:"market_type" db:"market_type"`
+	EntryDate      time.Time        `json:"entry_date" db:"entry_date"`
+	EntryPrice     float64          `json:"entry_price" db:"entry_price"`
+	Quantity       int              `json:"quantity" db:"quantity"`
+	TotalAmount    float64          `json:"total_amount" db:"total_amount"`
+	ExitPrice      *float64         `json:"exit_price" db:"exit_price"`
+	Direction      TradeDirection   `json:"direction" db:"direction"`
+	StopLoss       *float64         `json:"stop_loss" db:"stop_loss"`
+	Target         *float64         `json:"target" db:"target"`
+	Strategy       string           `json:"strategy" db:"strategy"`
+	OutcomeSummary OutcomeSummary   `json:"outcome_summary" db:"outcome_summary"`
+	TradeAnalysis  *string          `json:"trade_analysis" db:"trade_analysis"`
+	RulesFollowed  []string         `json:"rules_followed" db:"rules_followed"`
+	Screenshots    []string         `json:"screenshots" db:"screenshots"`
+	Psychology     *TradePsychology `json:"psychology" db:"psychology"`
+	CreatedAt      time.Time        `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time        `json:"updated_at" db:"updated_at"`
 }
 
-// TradeAction represents a buy or sell action for a trade
-type TradeAction struct {
-	ID        int       `json:"id" db:"id"`
-	TradeID   string    `json:"trade_id" db:"trade_id"`
-	Action    string    `json:"action" db:"action"` // buy, sell
-	TradeTime time.Time `json:"trade_time" db:"trade_time"`
-	Quantity  int       `json:"quantity" db:"quantity"`
-	Price     float64   `json:"price" db:"price"`
-	Fee       float64   `json:"fee" db:"fee"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+// TradePsychology represents psychology information for a trade
+type TradePsychology struct {
+	EntryConfidence    int      `json:"entry_confidence" db:"entry_confidence"`       // 1-10 scale
+	SatisfactionRating int      `json:"satisfaction_rating" db:"satisfaction_rating"` // 1-10 scale
+	EmotionalState     string   `json:"emotional_state" db:"emotional_state"`
+	MistakesMade       []string `json:"mistakes_made" db:"mistakes_made"`
+	LessonsLearned     *string  `json:"lessons_learned" db:"lessons_learned"`
 }
 
-// TradeJournal represents journal entries for trades
-type TradeJournal struct {
-	ID         int       `json:"id" db:"id"`
-	TradeID    string    `json:"trade_id" db:"trade_id"`
-	Notes      string    `json:"notes" db:"notes"`
-	Confidence int       `json:"confidence" db:"confidence"` // Scale 0-10
-	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+// Strategy represents a trading strategy
+type Strategy struct {
+	ID          string    `json:"id" db:"id"`
+	UserID      int       `json:"user_id" db:"user_id"`
+	Name        string    `json:"name" db:"name"`
+	Description string    `json:"description" db:"description"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Tag represents a tag for categorizing trades
-type Tag struct {
-	ID        int       `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+// Rule represents a trading rule
+type Rule struct {
+	ID          string       `json:"id" db:"id"`
+	UserID      int          `json:"user_id" db:"user_id"`
+	Name        string       `json:"name" db:"name"`
+	Description string       `json:"description" db:"description"`
+	Category    RuleCategory `json:"category" db:"category"`
+	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
 }
 
-// TradeTag represents the many-to-many relationship between trades and tags
-type TradeTag struct {
-	TradeID   string    `json:"trade_id" db:"trade_id"`
-	TagID     int       `json:"tag_id" db:"tag_id"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-}
-
-// TradeScreenshot represents screenshots attached to trade journals
-type TradeScreenshot struct {
-	ID             int       `json:"id" db:"id"`
-	TradeJournalID int       `json:"trade_journal_id" db:"trade_journal_id"`
-	URL            string    `json:"url" db:"url"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-}
-
-// Note represents daily trading notes
-type Note struct {
-	ID               int       `json:"id" db:"id"`
-	UserID           int       `json:"user_id" db:"user_id"`
-	Mood             string    `json:"mood" db:"mood"`                           // excited, neutral, low
-	MarketCondition  string    `json:"market_condition" db:"market_condition"`   // up, down, sideways
-	MarketVolatility string    `json:"market_volatility" db:"market_volatility"` // high, medium, low
-	Summary          string    `json:"summary" db:"summary"`
-	Day              time.Time `json:"day" db:"day"`
-	Notes            string    `json:"notes" db:"notes"`
-	CreatedAt        time.Time `json:"created_at" db:"created_at"`
-}
-
-// TradeSetup represents planned trade setups
-type TradeSetup struct {
-	ID              int       `json:"id" db:"id"`
-	UserID          int       `json:"user_id" db:"user_id"`
-	Market          string    `json:"market" db:"market"` // stock, option, crypto, futures, forex, index
-	Side            string    `json:"side" db:"side"`     // long, short
-	Symbol          string    `json:"symbol" db:"symbol"`
-	Entry           float64   `json:"entry" db:"entry"`
-	Target          float64   `json:"target" db:"target"`
-	StopLoss        float64   `json:"stoploss" db:"stoploss"`
-	Note            string    `json:"note" db:"note"`
-	RiskRewardRatio float64   `json:"risk_reward_ratio" db:"risk_reward_ratio"`
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
+// Mistake represents a trading mistake
+type Mistake struct {
+	ID        string          `json:"id" db:"id"`
+	UserID    int             `json:"user_id" db:"user_id"`
+	Name      string          `json:"name" db:"name"`
+	Category  MistakeCategory `json:"category" db:"category"`
+	CreatedAt time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at" db:"updated_at"`
 }
 
 // MarketType represents the different market types
 type MarketType string
 
 const (
-	MarketStock   MarketType = "stock"
-	MarketOption  MarketType = "option"
-	MarketCrypto  MarketType = "crypto"
-	MarketFutures MarketType = "futures"
-	MarketForex   MarketType = "forex"
-	MarketIndex   MarketType = "index"
+	MarketTypeIndian      MarketType = "indian"
+	MarketTypeUS          MarketType = "us"
+	MarketTypeCrypto      MarketType = "crypto"
+	MarketTypeForex       MarketType = "forex"
+	MarketTypeCommodities MarketType = "commodities"
 )
 
-// ActionType represents trade action types
-type ActionType string
+// TradeDirection represents trade direction
+type TradeDirection string
 
 const (
-	ActionBuy  ActionType = "buy"
-	ActionSell ActionType = "sell"
+	TradeDirectionLong  TradeDirection = "long"
+	TradeDirectionShort TradeDirection = "short"
 )
 
-// MoodType represents user mood types
-type MoodType string
+// TradeDuration represents trade duration
+type TradeDuration string
 
 const (
-	MoodExcited MoodType = "excited"
-	MoodNeutral MoodType = "neutral"
-	MoodLow     MoodType = "low"
+	TradeDurationIntraday   TradeDuration = "intraday"
+	TradeDurationSwing      TradeDuration = "swing"
+	TradeDurationPositional TradeDuration = "positional"
 )
 
-// MarketConditionType represents market condition types
-type MarketConditionType string
+// OutcomeSummary represents trade outcome
+type OutcomeSummary string
 
 const (
-	ConditionUp       MarketConditionType = "up"
-	ConditionDown     MarketConditionType = "down"
-	ConditionSideways MarketConditionType = "sideways"
+	OutcomeSummaryProfitable    OutcomeSummary = "profitable"
+	OutcomeSummaryLoss          OutcomeSummary = "loss"
+	OutcomeSummaryBreakeven     OutcomeSummary = "breakeven"
+	OutcomeSummaryPartialProfit OutcomeSummary = "partial_profit"
+	OutcomeSummaryPartialLoss   OutcomeSummary = "partial_loss"
 )
 
-// VolatilityType represents market volatility types
-type VolatilityType string
+// RuleCategory represents rule categories
+type RuleCategory string
 
 const (
-	VolatilityHigh   VolatilityType = "high"
-	VolatilityMedium VolatilityType = "medium"
-	VolatilityLow    VolatilityType = "low"
+	RuleCategoryEntry          RuleCategory = "entry"
+	RuleCategoryExit           RuleCategory = "exit"
+	RuleCategoryStopLoss       RuleCategory = "stop_loss"
+	RuleCategoryTakeProfit     RuleCategory = "take_profit"
+	RuleCategoryRiskManagement RuleCategory = "risk_management"
+	RuleCategoryPsychology     RuleCategory = "psychology"
+	RuleCategoryOther          RuleCategory = "other"
 )
 
-// SideType represents trade side types
-type SideType string
+// MistakeCategory represents mistake categories
+type MistakeCategory string
 
 const (
-	SideLong  SideType = "long"
-	SideShort SideType = "short"
+	MistakeCategoryPsychological MistakeCategory = "psychological"
+	MistakeCategoryBehavioral    MistakeCategory = "behavioral"
 )

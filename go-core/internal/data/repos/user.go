@@ -3,13 +3,12 @@ package repos
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"go-core/internal/data"
 	"go-core/internal/utils"
 )
 
-// UserRepository handles user-related database operations
+// UserRepository handles user database operations
 type UserRepository struct {
 	db *sql.DB
 }
@@ -19,144 +18,118 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-// Create creates a new user
-func (r *UserRepository) Create(user *data.User) error {
-	start := time.Now()
-	query := `
-		INSERT INTO users (name, email, phone, last_signed_in, created_at)
-		VALUES (?, ?, ?, ?, ?)
-	`
-
-	now := time.Now()
-	user.CreatedAt = now
-
-	result, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.LastSignedIn, user.CreatedAt)
-	duration := time.Since(start)
-
+// CreateUser creates a new user
+func (r *UserRepository) CreateUser(user *data.User) error {
+	query := `INSERT INTO users (name, email, phone, created_at) VALUES (?, ?, ?, ?)`
+	result, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.CreatedAt)
 	if err != nil {
-		utils.LogDatabase("CREATE", "users", duration, err, map[string]interface{}{
-			"email": user.Email,
-			"name":  user.Name,
-		})
+		utils.LogError(err, "Failed to create user")
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		utils.LogError(err, "Failed to get user ID", map[string]interface{}{
-			"email": user.Email,
-		})
+		utils.LogError(err, "Failed to get last insert ID for user")
 		return fmt.Errorf("failed to get user ID: %w", err)
 	}
 
 	user.ID = int(id)
-	utils.LogDatabase("CREATE", "users", duration, nil, map[string]interface{}{
-		"user_id": user.ID,
-		"email":   user.Email,
-	})
-
 	return nil
 }
 
-// GetByID retrieves a user by ID
-func (r *UserRepository) GetByID(id int) (*data.User, error) {
-	query := `
-		SELECT id, name, email, phone, last_signed_in, created_at
-		FROM users WHERE id = ?
-	`
+// GetUserByID retrieves a user by ID
+func (r *UserRepository) GetUserByID(id string) (*data.User, error) {
+	query := `SELECT id, name, email, phone, last_signed_in, created_at FROM users WHERE id = ?`
+	row := r.db.QueryRow(query, id)
 
 	user := &data.User{}
-	err := r.db.QueryRow(query, id).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Phone,
-		&user.LastSignedIn, &user.CreatedAt,
-	)
-
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("user not found")
 		}
+		utils.LogError(err, "Failed to get user by ID", map[string]interface{}{
+			"user_id": id,
+		})
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	return user, nil
 }
 
-// GetByEmail retrieves a user by email
-func (r *UserRepository) GetByEmail(email string) (*data.User, error) {
-	query := `
-		SELECT id, name, email, phone, last_signed_in, created_at
-		FROM users WHERE email = ?
-	`
-
-	user := &data.User{}
-	err := r.db.QueryRow(query, email).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Phone,
-		&user.LastSignedIn, &user.CreatedAt,
-	)
-
+// UpdateUser updates an existing user
+func (r *UserRepository) UpdateUser(user *data.User) error {
+	query := `UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?`
+	_, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user not found")
-		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
-	}
-
-	return user, nil
-}
-
-// Update updates a user
-func (r *UserRepository) Update(user *data.User) error {
-	query := `
-		UPDATE users 
-		SET name = ?, email = ?, phone = ?, last_signed_in = ?
-		WHERE id = ?
-	`
-
-	_, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.LastSignedIn, user.ID)
-	if err != nil {
+		utils.LogError(err, "Failed to update user", map[string]interface{}{
+			"user_id": user.ID,
+		})
 		return fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return nil
 }
 
-// Delete deletes a user
-func (r *UserRepository) Delete(id int) error {
+// DeleteUser deletes a user by ID
+func (r *UserRepository) DeleteUser(id string) error {
 	query := `DELETE FROM users WHERE id = ?`
-
-	_, err := r.db.Exec(query, id)
+	result, err := r.db.Exec(query, id)
 	if err != nil {
+		utils.LogError(err, "Failed to delete user", map[string]interface{}{
+			"user_id": id,
+		})
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		utils.LogError(err, "Failed to get rows affected for user deletion")
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("user not found")
 	}
 
 	return nil
 }
 
-// List retrieves all users
-func (r *UserRepository) List() ([]*data.User, error) {
-	query := `
-		SELECT id, name, email, phone, last_signed_in, created_at
-		FROM users ORDER BY created_at DESC
-	`
-
-	rows, err := r.db.Query(query)
+// GetUsers retrieves users with pagination
+func (r *UserRepository) GetUsers(limit, offset int) ([]*data.User, int, error) {
+	// Get total count
+	countQuery := `SELECT COUNT(*) FROM users`
+	var total int
+	err := r.db.QueryRow(countQuery).Scan(&total)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list users: %w", err)
+		utils.LogError(err, "Failed to get user count")
+		return nil, 0, fmt.Errorf("failed to get user count: %w", err)
+	}
+
+	// Get users with pagination
+	query := `SELECT id, name, email, phone, last_signed_in, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		utils.LogError(err, "Failed to get users")
+		return nil, 0, fmt.Errorf("failed to get users: %w", err)
 	}
 	defer rows.Close()
 
 	var users []*data.User
 	for rows.Next() {
 		user := &data.User{}
-		err := rows.Scan(
-			&user.ID, &user.Name, &user.Email, &user.Phone,
-			&user.LastSignedIn, &user.CreatedAt,
-		)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &user.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan user: %w", err)
+			utils.LogError(err, "Failed to scan user row")
+			return nil, 0, fmt.Errorf("failed to scan user: %w", err)
 		}
 		users = append(users, user)
 	}
 
-	return users, nil
+	if err = rows.Err(); err != nil {
+		utils.LogError(err, "Error iterating user rows")
+		return nil, 0, fmt.Errorf("failed to iterate users: %w", err)
+	}
+
+	return users, total, nil
 }
