@@ -5,6 +5,7 @@ import Sidebar from './Sidebar/Sidebar';
 import { ColorDemo, ConfigurePage } from './index';
 import TradesPage from './Trade/TradesPage';
 import { CalendarPage } from './Calendar';
+import AccountsPage from './Accounts/AccountsPage';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,8 @@ export default function Layout({ children }: LayoutProps) {
         return <TradesPage />;
       case 'Calendar':
         return <CalendarPage />;
+      case 'Accounts':
+        return <AccountsPage />;
       default:
         return children;
     }

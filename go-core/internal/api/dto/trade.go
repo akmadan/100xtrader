@@ -25,6 +25,13 @@ type CreateTradeRequest struct {
 	RulesFollowed  []string                 `json:"rules_followed,omitempty"`
 	Screenshots    []string                 `json:"screenshots,omitempty"`
 	Psychology     *CreatePsychologyRequest `json:"psychology,omitempty"`
+	// Broker-specific fields (optional, for imported trades)
+	TradingBroker   *data.TradingBroker `json:"trading_broker,omitempty"`
+	TraderBrokerID  *string             `json:"trader_broker_id,omitempty"`
+	ExchangeOrderID *string             `json:"exchange_order_id,omitempty"`
+	OrderID         *string             `json:"order_id,omitempty"`
+	ProductType     *data.ProductType   `json:"product_type,omitempty"`
+	TransactionType *string             `json:"transaction_type,omitempty"` // buy | sell
 }
 
 // UpdateTradeRequest represents the request to update an existing trade
@@ -46,7 +53,14 @@ type UpdateTradeRequest struct {
 	TradeAnalysis  *string                  `json:"trade_analysis,omitempty"`
 	RulesFollowed  []string                 `json:"rules_followed,omitempty"`
 	Screenshots    []string                 `json:"screenshots,omitempty"`
-	Psychology     *CreatePsychologyRequest `json:"psychology,omitempty"`
+	Psychology     *UpdatePsychologyRequest `json:"psychology,omitempty"`
+	// Broker-specific fields (optional, for imported trades)
+	TradingBroker   *data.TradingBroker `json:"trading_broker,omitempty"`
+	TraderBrokerID  *string             `json:"trader_broker_id,omitempty"`
+	ExchangeOrderID *string             `json:"exchange_order_id,omitempty"`
+	OrderID         *string             `json:"order_id,omitempty"`
+	ProductType     *data.ProductType   `json:"product_type,omitempty"`
+	TransactionType *string             `json:"transaction_type,omitempty"` // buy | sell
 }
 
 // CreatePsychologyRequest represents psychology data for a trade
@@ -54,6 +68,15 @@ type CreatePsychologyRequest struct {
 	EntryConfidence    int      `json:"entry_confidence" validate:"required,min=1,max=10"`
 	SatisfactionRating int      `json:"satisfaction_rating" validate:"required,min=1,max=10"`
 	EmotionalState     string   `json:"emotional_state" validate:"required"`
+	MistakesMade       []string `json:"mistakes_made,omitempty"`
+	LessonsLearned     *string  `json:"lessons_learned,omitempty"`
+}
+
+// UpdatePsychologyRequest represents psychology data for updating a trade (all fields optional)
+type UpdatePsychologyRequest struct {
+	EntryConfidence    *int     `json:"entry_confidence,omitempty" validate:"omitempty,min=1,max=10"`
+	SatisfactionRating *int     `json:"satisfaction_rating,omitempty" validate:"omitempty,min=1,max=10"`
+	EmotionalState     *string  `json:"emotional_state,omitempty" validate:"omitempty"`
 	MistakesMade       []string `json:"mistakes_made,omitempty"`
 	LessonsLearned     *string  `json:"lessons_learned,omitempty"`
 }
@@ -78,8 +101,15 @@ type TradeResponse struct {
 	RulesFollowed  []string            `json:"rules_followed,omitempty"`
 	Screenshots    []string            `json:"screenshots,omitempty"`
 	Psychology     *PsychologyResponse `json:"psychology,omitempty"`
-	CreatedAt      time.Time           `json:"created_at"`
-	UpdatedAt      time.Time           `json:"updated_at"`
+	// Broker-specific fields (optional, for imported trades)
+	TradingBroker   *data.TradingBroker `json:"trading_broker,omitempty"`
+	TraderBrokerID  *string             `json:"trader_broker_id,omitempty"`
+	ExchangeOrderID *string             `json:"exchange_order_id,omitempty"`
+	OrderID         *string             `json:"order_id,omitempty"`
+	ProductType     *data.ProductType   `json:"product_type,omitempty"`
+	TransactionType *string             `json:"transaction_type,omitempty"` // buy | sell
+	CreatedAt       time.Time           `json:"created_at"`
+	UpdatedAt       time.Time           `json:"updated_at"`
 }
 
 // PsychologyResponse represents psychology data in responses

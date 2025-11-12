@@ -22,6 +22,14 @@ export interface ITrade {
   // Psychology Information
   psychology: ITradePsychology | null;
 
+  // Broker-specific fields (optional, for imported trades)
+  tradingBroker?: TradingBroker;
+  traderBrokerId?: string;
+  exchangeOrderId?: string;
+  orderId?: string;
+  productType?: ProductType;
+  transactionType?: string; // "buy" | "sell"
+
   // Metadata
   createdAt: Date;
   updatedAt: Date;
@@ -82,6 +90,7 @@ export interface ITradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ITradeFormData) => void;
+  initialData?: ITrade; // For editing existing trades
 }
 
 // Psychology-specific interfaces
@@ -123,4 +132,17 @@ export enum OutcomeSummary {
   BREAKEVEN = "breakeven",
   PARTIAL_PROFIT = "partial_profit",
   PARTIAL_LOSS = "partial_loss",
+}
+
+export enum TradingBroker {
+  ZERODHA = "zerodha",
+  DHAN = "dhan",
+}
+
+export enum ProductType {
+  CNC = "CNC",
+  MIS = "MIS",
+  NRML = "NRML",
+  INTRADAY = "INTRADAY",
+  OTC = "OTC",
 }

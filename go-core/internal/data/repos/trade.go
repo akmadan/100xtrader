@@ -46,16 +46,39 @@ func (r *TradeRepository) CreateTrade(trade *data.Trade) error {
 			id, user_id, symbol, market_type, entry_date, entry_price, quantity, 
 			total_amount, exit_price, direction, stop_loss, target, strategy, 
 			outcome_summary, trade_analysis, rules_followed, screenshots, psychology,
+			trading_broker, trader_broker_id, exchange_order_id, order_id, product_type, transaction_type,
 			created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
+
+	var tradingBroker, traderBrokerID, exchangeOrderID, orderID, productType, transactionType interface{}
+	if trade.TradingBroker != nil {
+		tradingBroker = string(*trade.TradingBroker)
+	}
+	if trade.TraderBrokerID != nil {
+		traderBrokerID = *trade.TraderBrokerID
+	}
+	if trade.ExchangeOrderID != nil {
+		exchangeOrderID = *trade.ExchangeOrderID
+	}
+	if trade.OrderID != nil {
+		orderID = *trade.OrderID
+	}
+	if trade.ProductType != nil {
+		productType = string(*trade.ProductType)
+	}
+	if trade.TransactionType != nil {
+		transactionType = *trade.TransactionType
+	}
 
 	_, err = r.db.Exec(query,
 		trade.ID, trade.UserID, trade.Symbol, trade.MarketType, trade.EntryDate,
 		trade.EntryPrice, trade.Quantity, trade.TotalAmount, trade.ExitPrice,
 		trade.Direction, trade.StopLoss, trade.Target, trade.Strategy,
 		trade.OutcomeSummary, trade.TradeAnalysis, string(rulesFollowedJSON),
-		string(screenshotsJSON), string(psychologyJSON), trade.CreatedAt, trade.UpdatedAt,
+		string(screenshotsJSON), string(psychologyJSON),
+		tradingBroker, traderBrokerID, exchangeOrderID, orderID, productType, transactionType,
+		trade.CreatedAt, trade.UpdatedAt,
 	)
 
 	if err != nil {
@@ -100,16 +123,40 @@ func (r *TradeRepository) UpdateTrade(trade *data.Trade) error {
 			quantity = ?, total_amount = ?, exit_price = ?, direction = ?, 
 			stop_loss = ?, target = ?, strategy = ?, outcome_summary = ?, 
 			trade_analysis = ?, rules_followed = ?, screenshots = ?, 
-			psychology = ?, updated_at = ?
+			psychology = ?, trading_broker = ?, trader_broker_id = ?, 
+			exchange_order_id = ?, order_id = ?, product_type = ?, transaction_type = ?,
+			updated_at = ?
 		WHERE id = ? AND user_id = ?
 	`
+
+	var tradingBroker, traderBrokerID, exchangeOrderID, orderID, productType, transactionType interface{}
+	if trade.TradingBroker != nil {
+		tradingBroker = string(*trade.TradingBroker)
+	}
+	if trade.TraderBrokerID != nil {
+		traderBrokerID = *trade.TraderBrokerID
+	}
+	if trade.ExchangeOrderID != nil {
+		exchangeOrderID = *trade.ExchangeOrderID
+	}
+	if trade.OrderID != nil {
+		orderID = *trade.OrderID
+	}
+	if trade.ProductType != nil {
+		productType = string(*trade.ProductType)
+	}
+	if trade.TransactionType != nil {
+		transactionType = *trade.TransactionType
+	}
 
 	result, err := r.db.Exec(query,
 		trade.Symbol, trade.MarketType, trade.EntryDate, trade.EntryPrice,
 		trade.Quantity, trade.TotalAmount, trade.ExitPrice, trade.Direction,
 		trade.StopLoss, trade.Target, trade.Strategy, trade.OutcomeSummary,
 		trade.TradeAnalysis, string(rulesFollowedJSON), string(screenshotsJSON),
-		string(psychologyJSON), trade.UpdatedAt, trade.ID, trade.UserID,
+		string(psychologyJSON),
+		tradingBroker, traderBrokerID, exchangeOrderID, orderID, productType, transactionType,
+		trade.UpdatedAt, trade.ID, trade.UserID,
 	)
 
 	if err != nil {
@@ -142,6 +189,7 @@ func (r *TradeRepository) GetTradeByID(tradeID string, userID int) (*data.Trade,
 		SELECT id, user_id, symbol, market_type, entry_date, entry_price, quantity,
 			   total_amount, exit_price, direction, stop_loss, target, strategy,
 			   outcome_summary, trade_analysis, rules_followed, screenshots, psychology,
+			   trading_broker, trader_broker_id, exchange_order_id, order_id, product_type, transaction_type,
 			   created_at, updated_at
 		FROM trades 
 		WHERE id = ? AND user_id = ?
@@ -169,10 +217,11 @@ func (r *TradeRepository) GetTradesByUser(userID int, limit, offset int) ([]*dat
 		SELECT id, user_id, symbol, market_type, entry_date, entry_price, quantity,
 			   total_amount, exit_price, direction, stop_loss, target, strategy,
 			   outcome_summary, trade_analysis, rules_followed, screenshots, psychology,
+			   trading_broker, trader_broker_id, exchange_order_id, order_id, product_type, transaction_type,
 			   created_at, updated_at
 		FROM trades 
 		WHERE user_id = ?
-		ORDER BY created_at DESC
+		ORDER BY entry_date DESC, created_at DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -236,13 +285,16 @@ func (r *TradeRepository) scanTrade(scanner interface {
 	var trade data.Trade
 	var rulesFollowedJSON, screenshotsJSON, psychologyJSON string
 	var entryDate, createdAt, updatedAt time.Time
+	var tradingBroker, traderBrokerID, exchangeOrderID, orderID, productType, transactionType sql.NullString
 
 	err := scanner.Scan(
 		&trade.ID, &trade.UserID, &trade.Symbol, &trade.MarketType, &entryDate,
 		&trade.EntryPrice, &trade.Quantity, &trade.TotalAmount, &trade.ExitPrice,
 		&trade.Direction, &trade.StopLoss, &trade.Target, &trade.Strategy,
 		&trade.OutcomeSummary, &trade.TradeAnalysis, &rulesFollowedJSON,
-		&screenshotsJSON, &psychologyJSON, &createdAt, &updatedAt,
+		&screenshotsJSON, &psychologyJSON,
+		&tradingBroker, &traderBrokerID, &exchangeOrderID, &orderID, &productType, &transactionType,
+		&createdAt, &updatedAt,
 	)
 
 	if err != nil {
@@ -266,10 +318,110 @@ func (r *TradeRepository) scanTrade(scanner interface {
 		trade.Psychology = &psychology
 	}
 
+	// Set broker-specific fields
+	if tradingBroker.Valid {
+		broker := data.TradingBroker(tradingBroker.String)
+		trade.TradingBroker = &broker
+	}
+	if traderBrokerID.Valid {
+		trade.TraderBrokerID = &traderBrokerID.String
+	}
+	if exchangeOrderID.Valid {
+		trade.ExchangeOrderID = &exchangeOrderID.String
+	}
+	if orderID.Valid {
+		trade.OrderID = &orderID.String
+	}
+	if productType.Valid {
+		product := data.ProductType(productType.String)
+		trade.ProductType = &product
+	}
+	if transactionType.Valid {
+		trade.TransactionType = &transactionType.String
+	}
+
 	// Set time fields
 	trade.EntryDate = entryDate
 	trade.CreatedAt = createdAt
 	trade.UpdatedAt = updatedAt
 
 	return &trade, nil
+}
+
+// TradeExistsByBrokerID checks if a trade already exists for a user by broker-specific ID
+// This is used to prevent duplicate imports from broker APIs
+func (r *TradeRepository) TradeExistsByBrokerID(userID int, tradingBroker data.TradingBroker, exchangeOrderID, orderID string) (bool, error) {
+	query := `
+		SELECT COUNT(*) 
+		FROM trades 
+		WHERE user_id = ? 
+		AND trading_broker = ? 
+		AND (
+			(exchange_order_id IS NOT NULL AND exchange_order_id = ?) OR
+			(order_id IS NOT NULL AND order_id = ?)
+		)
+		LIMIT 1
+	`
+
+	var count int
+	err := r.db.QueryRow(query, userID, string(tradingBroker), exchangeOrderID, orderID).Scan(&count)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		utils.LogError(err, "Failed to check if trade exists by broker ID", map[string]interface{}{
+			"user_id":           userID,
+			"trading_broker":    tradingBroker,
+			"exchange_order_id": exchangeOrderID,
+			"order_id":          orderID,
+		})
+		return false, fmt.Errorf("failed to check if trade exists: %w", err)
+	}
+
+	return count > 0, nil
+}
+
+// GetLatestTradeDateByBroker gets the latest entry_date for trades from a specific broker for a user
+// Returns nil if no trades exist for that broker
+func (r *TradeRepository) GetLatestTradeDateByBroker(userID int, tradingBroker data.TradingBroker) (*time.Time, error) {
+	query := `
+		SELECT MAX(entry_date) 
+		FROM trades 
+		WHERE user_id = ? AND trading_broker = ?
+	`
+
+	var latestDateStr sql.NullString
+	err := r.db.QueryRow(query, userID, string(tradingBroker)).Scan(&latestDateStr)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No trades found
+		}
+		utils.LogError(err, "Failed to get latest trade date by broker", map[string]interface{}{
+			"user_id":        userID,
+			"trading_broker": tradingBroker,
+		})
+		return nil, fmt.Errorf("failed to get latest trade date: %w", err)
+	}
+
+	if !latestDateStr.Valid || latestDateStr.String == "" {
+		return nil, nil // No trades found
+	}
+
+	// Parse the date string (SQLite stores dates as strings)
+	latestDate, err := time.Parse("2006-01-02T15:04:05Z07:00", latestDateStr.String)
+	if err != nil {
+		// Try alternative formats
+		latestDate, err = time.Parse("2006-01-02 15:04:05", latestDateStr.String)
+		if err != nil {
+			latestDate, err = time.Parse("2006-01-02", latestDateStr.String)
+			if err != nil {
+				utils.LogError(err, "Failed to parse latest trade date", map[string]interface{}{
+					"date_string": latestDateStr.String,
+				})
+				return nil, fmt.Errorf("failed to parse latest trade date: %w", err)
+			}
+		}
+	}
+
+	return &latestDate, nil
 }

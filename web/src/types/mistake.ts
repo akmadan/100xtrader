@@ -1,4 +1,4 @@
-enum MistakeCategory {
+export enum MistakeCategory {
   PSYCHOLOGICAL = "psychological",
   BEHAVIORAL = "behavioral",
 }

@@ -2,6 +2,7 @@ package repos
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"go-core/internal/data"
@@ -20,8 +21,20 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 // CreateUser creates a new user
 func (r *UserRepository) CreateUser(user *data.User) error {
-	query := `INSERT INTO users (name, email, phone, created_at) VALUES (?, ?, ?, ?)`
-	result, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.CreatedAt)
+	// Convert configuredBrokers to JSON
+	var configuredBrokersJSON []byte
+	var err error
+	if user.ConfiguredBrokers == nil {
+		configuredBrokersJSON = []byte("{}")
+	} else {
+		configuredBrokersJSON, err = json.Marshal(user.ConfiguredBrokers)
+		if err != nil {
+			return fmt.Errorf("failed to marshal configured_brokers: %w", err)
+		}
+	}
+
+	query := `INSERT INTO users (name, email, phone, configured_brokers, created_at) VALUES (?, ?, ?, ?, ?)`
+	result, err := r.db.Exec(query, user.Name, user.Email, user.Phone, string(configuredBrokersJSON), user.CreatedAt)
 	if err != nil {
 		utils.LogError(err, "Failed to create user")
 		return fmt.Errorf("failed to create user: %w", err)
@@ -39,11 +52,12 @@ func (r *UserRepository) CreateUser(user *data.User) error {
 
 // GetUserByID retrieves a user by ID
 func (r *UserRepository) GetUserByID(id string) (*data.User, error) {
-	query := `SELECT id, name, email, phone, last_signed_in, created_at FROM users WHERE id = ?`
+	query := `SELECT id, name, email, phone, last_signed_in, configured_brokers, created_at FROM users WHERE id = ?`
 	row := r.db.QueryRow(query, id)
 
 	user := &data.User{}
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &user.CreatedAt)
+	var configuredBrokersJSON string
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &configuredBrokersJSON, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("user not found")
@@ -54,13 +68,38 @@ func (r *UserRepository) GetUserByID(id string) (*data.User, error) {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
+	// Parse configuredBrokers JSON
+	if configuredBrokersJSON != "" && configuredBrokersJSON != "{}" {
+		if err := json.Unmarshal([]byte(configuredBrokersJSON), &user.ConfiguredBrokers); err != nil {
+			utils.LogError(err, "Failed to unmarshal configured_brokers", map[string]interface{}{
+				"user_id": id,
+			})
+			// Set empty map if unmarshal fails
+			user.ConfiguredBrokers = make(map[string]data.BrokerConfig)
+		}
+	} else {
+		user.ConfiguredBrokers = make(map[string]data.BrokerConfig)
+	}
+
 	return user, nil
 }
 
 // UpdateUser updates an existing user
 func (r *UserRepository) UpdateUser(user *data.User) error {
-	query := `UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?`
-	_, err := r.db.Exec(query, user.Name, user.Email, user.Phone, user.ID)
+	// Convert configuredBrokers to JSON
+	var configuredBrokersJSON []byte
+	var err error
+	if user.ConfiguredBrokers == nil {
+		configuredBrokersJSON = []byte("{}")
+	} else {
+		configuredBrokersJSON, err = json.Marshal(user.ConfiguredBrokers)
+		if err != nil {
+			return fmt.Errorf("failed to marshal configured_brokers: %w", err)
+		}
+	}
+
+	query := `UPDATE users SET name = ?, email = ?, phone = ?, configured_brokers = ? WHERE id = ?`
+	_, err = r.db.Exec(query, user.Name, user.Email, user.Phone, string(configuredBrokersJSON), user.ID)
 	if err != nil {
 		utils.LogError(err, "Failed to update user", map[string]interface{}{
 			"user_id": user.ID,
@@ -69,6 +108,26 @@ func (r *UserRepository) UpdateUser(user *data.User) error {
 	}
 
 	return nil
+}
+
+// UpdateUserBrokerConfig updates the broker configuration for a user
+func (r *UserRepository) UpdateUserBrokerConfig(userID int, brokerName string, config data.BrokerConfig) error {
+	// Get current user
+	user, err := r.GetUserByID(fmt.Sprintf("%d", userID))
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// Initialize map if nil
+	if user.ConfiguredBrokers == nil {
+		user.ConfiguredBrokers = make(map[string]data.BrokerConfig)
+	}
+
+	// Update broker config
+	user.ConfiguredBrokers[brokerName] = config
+
+	// Save updated user
+	return r.UpdateUser(user)
 }
 
 // DeleteUser deletes a user by ID
@@ -107,7 +166,7 @@ func (r *UserRepository) GetUsers(limit, offset int) ([]*data.User, int, error) 
 	}
 
 	// Get users with pagination
-	query := `SELECT id, name, email, phone, last_signed_in, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	query := `SELECT id, name, email, phone, last_signed_in, configured_brokers, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
 		utils.LogError(err, "Failed to get users")
@@ -118,11 +177,23 @@ func (r *UserRepository) GetUsers(limit, offset int) ([]*data.User, int, error) 
 	var users []*data.User
 	for rows.Next() {
 		user := &data.User{}
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &user.CreatedAt)
+		var configuredBrokersJSON string
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.LastSignedIn, &configuredBrokersJSON, &user.CreatedAt)
 		if err != nil {
 			utils.LogError(err, "Failed to scan user row")
 			return nil, 0, fmt.Errorf("failed to scan user: %w", err)
 		}
+
+		// Parse configuredBrokers JSON
+		if configuredBrokersJSON != "" && configuredBrokersJSON != "{}" {
+			if err := json.Unmarshal([]byte(configuredBrokersJSON), &user.ConfiguredBrokers); err != nil {
+				utils.LogError(err, "Failed to unmarshal configured_brokers")
+				user.ConfiguredBrokers = make(map[string]data.BrokerConfig)
+			}
+		} else {
+			user.ConfiguredBrokers = make(map[string]data.BrokerConfig)
+		}
+
 		users = append(users, user)
 	}
 

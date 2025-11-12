@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Target, BookOpen, AlertTriangle } from "lucide-react";
-import { IStrategy, IStrategyFormData, IRule, IRuleCreateRequest, IMistake, IMistakeCreateRequest } from "@/types";
+import { IStrategy, IStrategyFormData, IRule, IRuleCreateRequest, IMistake, IMistakeCreateRequest, RuleCategory, MistakeCategory } from "@/types";
+import { strategyApi, ruleApi, mistakeApi } from "@/services/api";
 
 // Strategy Modal Component
 function AddStrategyModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose: () => void; onSubmit: (data: IStrategyFormData) => void }) {
@@ -91,7 +92,7 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
     userId: "current-user",
     name: "",
     description: "",
-    category: "ENTRY" as any,
+    category: RuleCategory.ENTRY,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -102,7 +103,7 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-      setFormData({ userId: "current-user", name: "", description: "", category: "ENTRY" as any });
+      setFormData({ userId: "current-user", name: "", description: "", category: RuleCategory.ENTRY });
       onClose();
     } catch (error) {
       console.error("Error creating rule:", error);
@@ -112,7 +113,7 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
   };
 
   const handleClose = () => {
-    setFormData({ userId: "current-user", name: "", description: "", category: "ENTRY" as any });
+    setFormData({ userId: "current-user", name: "", description: "", category: RuleCategory.ENTRY });
     onClose();
   };
 
@@ -149,16 +150,16 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
             <label className="block text-sm font-helvetica-medium text-primary mb-2">Category</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as RuleCategory })}
               className="w-full px-3 py-2 bg-primary border border-primary rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent font-helvetica transition-colors"
             >
-              <option value="ENTRY">Entry</option>
-              <option value="EXIT">Exit</option>
-              <option value="STOP_LOSS">Stop Loss</option>
-              <option value="TAKE_PROFIT">Take Profit</option>
-              <option value="RISK_MANAGEMENT">Risk Management</option>
-              <option value="PSYCHOLOGY">Psychology</option>
-              <option value="OTHER">Other</option>
+              <option value={RuleCategory.ENTRY}>Entry</option>
+              <option value={RuleCategory.EXIT}>Exit</option>
+              <option value={RuleCategory.STOP_LOSS}>Stop Loss</option>
+              <option value={RuleCategory.TAKE_PROFIT}>Take Profit</option>
+              <option value={RuleCategory.RISK_MANAGEMENT}>Risk Management</option>
+              <option value={RuleCategory.PSYCHOLOGY}>Psychology</option>
+              <option value={RuleCategory.OTHER}>Other</option>
             </select>
           </div>
           <div>
@@ -192,7 +193,7 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
   const [formData, setFormData] = useState<IMistakeCreateRequest>({
     userId: "current-user",
     name: "",
-    category: "PSYCHOLOGICAL" as any,
+    category: MistakeCategory.PSYCHOLOGICAL,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -203,7 +204,7 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-      setFormData({ userId: "current-user", name: "", category: "PSYCHOLOGICAL" as any });
+      setFormData({ userId: "current-user", name: "", category: MistakeCategory.PSYCHOLOGICAL });
       onClose();
     } catch (error) {
       console.error("Error creating mistake:", error);
@@ -213,7 +214,7 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
   };
 
   const handleClose = () => {
-    setFormData({ userId: "current-user", name: "", category: "PSYCHOLOGICAL" as any });
+    setFormData({ userId: "current-user", name: "", category: MistakeCategory.PSYCHOLOGICAL });
     onClose();
   };
 
@@ -250,11 +251,11 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
             <label className="block text-sm font-helvetica-medium text-primary mb-2">Category</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as MistakeCategory })}
               className="w-full px-3 py-2 bg-primary border border-primary rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent font-helvetica transition-colors"
             >
-              <option value="PSYCHOLOGICAL">Psychological</option>
-              <option value="BEHAVIORAL">Behavioral</option>
+              <option value={MistakeCategory.PSYCHOLOGICAL}>Psychological</option>
+              <option value={MistakeCategory.BEHAVIORAL}>Behavioral</option>
             </select>
           </div>
           <div className="pt-4">
@@ -281,42 +282,144 @@ export default function ConfigurePage() {
   const [strategies, setStrategies] = useState<IStrategy[]>([]);
   const [rules, setRules] = useState<IRule[]>([]);
   const [mistakes, setMistakes] = useState<IMistake[]>([]);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // TODO: Get userId from authentication context
+  const userId = 1;
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch all data in parallel
+      const [strategiesRes, rulesRes, mistakesRes] = await Promise.all([
+        strategyApi.getAll(userId),
+        ruleApi.getAll(userId),
+        mistakeApi.getAll(userId),
+      ]);
+
+      // Transform API responses to match TypeScript interfaces
+      // Use optional chaining and default to empty array to prevent null reference errors
+      setStrategies(
+        ((strategiesRes && strategiesRes.strategies) || []).map((s) => ({
+          id: s.id,
+          userId: s.user_id.toString(),
+          name: s.name,
+          description: s.description,
+          createdAt: new Date(s.created_at),
+          updatedAt: new Date(s.updated_at),
+        }))
+      );
+
+      setRules(
+        ((rulesRes && rulesRes.rules) || []).map((r) => ({
+          id: r.id,
+          userId: r.user_id.toString(),
+          name: r.name,
+          description: r.description,
+          category: r.category as any,
+          createdAt: new Date(r.created_at),
+          updatedAt: new Date(r.updated_at),
+        }))
+      );
+
+      setMistakes(
+        ((mistakesRes && mistakesRes.mistakes) || []).map((m) => ({
+          id: m.id,
+          userId: m.user_id.toString(),
+          name: m.name,
+          category: m.category as any,
+          createdAt: new Date(m.created_at),
+          updatedAt: new Date(m.updated_at),
+        }))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch data");
+      console.error("Error fetching data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddStrategy = async (data: IStrategyFormData) => {
-    const newStrategy: IStrategy = {
-      id: Date.now().toString(),
-      name: data.name,
-      description: data.description,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: "current-user",
-    };
-    setStrategies([...strategies, newStrategy]);
+    setError(null);
+    try {
+      const response = await strategyApi.create(userId, {
+        name: data.name,
+        description: data.description,
+      });
+
+      const newStrategy: IStrategy = {
+        id: response.id,
+        userId: response.user_id.toString(),
+        name: response.name,
+        description: response.description,
+        createdAt: new Date(response.created_at),
+        updatedAt: new Date(response.updated_at),
+      };
+      setStrategies([...strategies, newStrategy]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create strategy";
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   const handleAddRule = async (data: IRuleCreateRequest) => {
-    const newRule: IRule = {
-      id: Date.now().toString(),
-      name: data.name,
-      description: data.description,
-      category: data.category,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: "current-user",
-    };
-    setRules([...rules, newRule]);
+    setError(null);
+    try {
+      const response = await ruleApi.create(userId, {
+        name: data.name,
+        description: data.description,
+        category: data.category as string,
+      });
+
+      const newRule: IRule = {
+        id: response.id,
+        userId: response.user_id.toString(),
+        name: response.name,
+        description: response.description,
+        category: response.category as any,
+        createdAt: new Date(response.created_at),
+        updatedAt: new Date(response.updated_at),
+      };
+      setRules([...rules, newRule]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create rule";
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   const handleAddMistake = async (data: IMistakeCreateRequest) => {
-    const newMistake: IMistake = {
-      id: Date.now().toString(),
-      name: data.name,
-      category: data.category,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: "current-user",
-    };
-    setMistakes([...mistakes, newMistake]);
+    setError(null);
+    try {
+      const response = await mistakeApi.create(userId, {
+        name: data.name,
+        category: data.category as string,
+      });
+
+      const newMistake: IMistake = {
+        id: response.id,
+        userId: response.user_id.toString(),
+        name: response.name,
+        category: response.category as any,
+        createdAt: new Date(response.created_at),
+        updatedAt: new Date(response.updated_at),
+      };
+      setMistakes([...mistakes, newMistake]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create mistake";
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   const tabs = [
@@ -324,6 +427,14 @@ export default function ConfigurePage() {
     { id: "rules", label: "Rules", icon: BookOpen },
     { id: "mistakes", label: "Mistakes", icon: AlertTriangle },
   ];
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -345,17 +456,48 @@ export default function ConfigurePage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {strategies.map((strategy) => (
-                  <div key={strategy.id} className="bg-secondary border border-primary rounded-lg p-6 hover:bg-tertiary transition-colors duration-200">
-                    <h3 className="text-lg font-helvetica-bold text-primary mb-2">{strategy.name}</h3>
-                    <p className="text-tertiary font-helvetica text-sm mb-4 line-clamp-3">{strategy.description}</p>
-                    <div className="flex items-center justify-between text-xs text-muted">
-                      <span className="font-helvetica">Created {strategy.createdAt.toLocaleDateString()}</span>
-                      <span className="font-helvetica">Updated {strategy.updatedAt.toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-primary border border-primary rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-primary">
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Name</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Description</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Created</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Updated</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {strategies.map((strategy) => (
+                        <tr
+                          key={strategy.id}
+                          className="border-b border-primary hover:bg-tertiary transition-colors duration-200"
+                        >
+                          <td className="py-3 px-4">
+                            <span className="font-helvetica-bold text-primary">
+                              {strategy.name}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {strategy.description}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(strategy.createdAt)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(strategy.updatedAt)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -378,18 +520,54 @@ export default function ConfigurePage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rules.map((rule) => (
-                  <div key={rule.id} className="bg-secondary border border-primary rounded-lg p-6 hover:bg-tertiary transition-colors duration-200">
-                    <h3 className="text-lg font-helvetica-bold text-primary mb-2">{rule.name}</h3>
-                    <p className="text-tertiary font-helvetica text-sm mb-2">{rule.description}</p>
-                    <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded mb-4">{rule.category}</span>
-                    <div className="flex items-center justify-between text-xs text-muted">
-                      <span className="font-helvetica">Created {rule.createdAt.toLocaleDateString()}</span>
-                      <span className="font-helvetica">Updated {rule.updatedAt.toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-primary border border-primary rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-primary">
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Name</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Description</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Category</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Created</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Updated</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rules.map((rule) => (
+                        <tr
+                          key={rule.id}
+                          className="border-b border-primary hover:bg-tertiary transition-colors duration-200"
+                        >
+                          <td className="py-3 px-4">
+                            <span className="font-helvetica-bold text-primary">
+                              {rule.name}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {rule.description}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
+                              {rule.category.replace(/_/g, " ")}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(rule.createdAt)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(rule.updatedAt)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -412,17 +590,48 @@ export default function ConfigurePage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mistakes.map((mistake) => (
-                  <div key={mistake.id} className="bg-secondary border border-primary rounded-lg p-6 hover:bg-tertiary transition-colors duration-200">
-                    <h3 className="text-lg font-helvetica-bold text-primary mb-2">{mistake.name}</h3>
-                    <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded mb-4">{mistake.category}</span>
-                    <div className="flex items-center justify-between text-xs text-muted">
-                      <span className="font-helvetica">Created {mistake.createdAt.toLocaleDateString()}</span>
-                      <span className="font-helvetica">Updated {mistake.updatedAt.toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-primary border border-primary rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-primary">
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Name</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Category</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Created</th>
+                        <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Updated</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mistakes.map((mistake) => (
+                        <tr
+                          key={mistake.id}
+                          className="border-b border-primary hover:bg-tertiary transition-colors duration-200"
+                        >
+                          <td className="py-3 px-4">
+                            <span className="font-helvetica-bold text-primary">
+                              {mistake.name}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
+                              {mistake.category}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(mistake.createdAt)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-primary font-helvetica-light text-sm">
+                              {formatDate(mistake.updatedAt)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -434,6 +643,13 @@ export default function ConfigurePage() {
 
   return (
     <div className="p-6">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400">
+          <p className="font-helvetica-medium">{error}</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -473,13 +689,20 @@ export default function ConfigurePage() {
               else if (activeTab === "rules") setIsRuleModalOpen(true);
               else if (activeTab === "mistakes") setIsMistakeModalOpen(true);
             }}
-            className="flex items-center space-x-2 bg-accent hover:bg-secondary text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
+            disabled={loading}
+            className="flex items-center space-x-2 bg-accent hover:bg-secondary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
           >
             <Plus className="w-4 h-4" />
             <span>Add {activeTab.slice(0, -1)}</span>
           </button>
         </div>
-        {renderContent()}
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-tertiary font-helvetica">Loading...</p>
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
 
       {/* Modals */}

@@ -90,6 +90,19 @@ func (s *Server) setupRoutes() {
 			users.POST("/signin", handlers.SignInUser(s.db))
 		}
 
+		// Dhan broker routes (separate group to avoid route conflict)
+		dhan := v1.Group("/users/:id/dhan")
+		{
+			dhan.POST("/save-credentials", handlers.SaveDhanCredentials(s.db)) // Save API key & secret
+			dhan.POST("/generate-consent", handlers.GenerateDhanConsent(s.db)) // Step 1: Generate consent
+			dhan.POST("/consume-consent", handlers.ConsumeDhanConsent(s.db))   // Step 3: Consume consent
+			dhan.POST("/renew-token", handlers.RenewDhanToken(s.db))           // Renew token (auto-refresh)
+			dhan.GET("/config", handlers.GetDhanBrokerConfig(s.db))
+		}
+
+		// Dhan OAuth callback webhook (separate route, accepts tokenId and userId as query params)
+		v1.GET("/dhan/consent-callback", handlers.ConsumeDhanConsentCallback(s.db))
+
 		// Trade routes
 		trades := v1.Group("/trades")
 		{
@@ -99,6 +112,12 @@ func (s *Server) setupRoutes() {
 			trades.DELETE("/:id", handlers.DeleteTrade(s.db))            // Delete trade
 			trades.GET("", handlers.ListTrades(s.db))                    // List trades
 			trades.GET("/user/:user_id", handlers.GetTradesByUser(s.db)) // Get user's trades
+		}
+
+		// User-specific trade routes (use :id to match other user routes)
+		userTrades := v1.Group("/users/:id/trades")
+		{
+			userTrades.POST("/sync-dhan", handlers.SyncDhanTrades(s.db)) // Sync Dhan trades
 		}
 
 		// Strategy routes

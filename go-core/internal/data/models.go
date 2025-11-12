@@ -6,12 +6,25 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID           int        `json:"id" db:"id"`
-	Name         string     `json:"name" db:"name"`
-	Email        string     `json:"email" db:"email"`
-	Phone        *string    `json:"phone" db:"phone"`
-	LastSignedIn *time.Time `json:"last_signed_in" db:"last_signed_in"`
-	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	ID                int                     `json:"id" db:"id"`
+	Name              string                  `json:"name" db:"name"`
+	Email             string                  `json:"email" db:"email"`
+	Phone             *string                 `json:"phone" db:"phone"`
+	LastSignedIn      *time.Time              `json:"last_signed_in" db:"last_signed_in"`
+	ConfiguredBrokers map[string]BrokerConfig `json:"configured_brokers" db:"configured_brokers"` // JSON field storing broker configs
+	CreatedAt         time.Time               `json:"created_at" db:"created_at"`
+}
+
+// BrokerConfig represents configuration for a broker
+type BrokerConfig struct {
+	AccessToken    string     `json:"access_token"`
+	APIKey         *string    `json:"api_key,omitempty"`    // For OAuth flow
+	APISecret      *string    `json:"api_secret,omitempty"` // For OAuth flow (encrypted in production)
+	DhanClientID   *string    `json:"dhan_client_id,omitempty"`
+	DhanClientName *string    `json:"dhan_client_name,omitempty"`
+	DhanClientUcc  *string    `json:"dhan_client_ucc,omitempty"`
+	ExpiryTime     *time.Time `json:"expiry_time,omitempty"`
+	ConfiguredAt   time.Time  `json:"configured_at"`
 }
 
 // Trade represents a trading position
@@ -34,8 +47,15 @@ type Trade struct {
 	RulesFollowed  []string         `json:"rules_followed" db:"rules_followed"`
 	Screenshots    []string         `json:"screenshots" db:"screenshots"`
 	Psychology     *TradePsychology `json:"psychology" db:"psychology"`
-	CreatedAt      time.Time        `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time        `json:"updated_at" db:"updated_at"`
+	// Broker-specific fields (optional, for imported trades)
+	TradingBroker   *TradingBroker `json:"trading_broker,omitempty" db:"trading_broker"`
+	TraderBrokerID  *string        `json:"trader_broker_id,omitempty" db:"trader_broker_id"`
+	ExchangeOrderID *string        `json:"exchange_order_id,omitempty" db:"exchange_order_id"`
+	OrderID         *string        `json:"order_id,omitempty" db:"order_id"`
+	ProductType     *ProductType   `json:"product_type,omitempty" db:"product_type"`
+	TransactionType *string        `json:"transaction_type,omitempty" db:"transaction_type"` // buy | sell
+	CreatedAt       time.Time      `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at" db:"updated_at"`
 }
 
 // TradePsychology represents psychology information for a trade
@@ -136,4 +156,23 @@ type MistakeCategory string
 const (
 	MistakeCategoryPsychological MistakeCategory = "psychological"
 	MistakeCategoryBehavioral    MistakeCategory = "behavioral"
+)
+
+// TradingBroker represents supported trading brokers
+type TradingBroker string
+
+const (
+	TradingBrokerZerodha TradingBroker = "zerodha"
+	TradingBrokerDhan    TradingBroker = "dhan"
+)
+
+// ProductType represents broker product types
+type ProductType string
+
+const (
+	ProductTypeCNC      ProductType = "CNC"
+	ProductTypeMIS      ProductType = "MIS"
+	ProductTypeNRML     ProductType = "NRML"
+	ProductTypeIntraday ProductType = "INTRADAY"
+	ProductTypeOTC      ProductType = "OTC"
 )

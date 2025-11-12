@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Info, Brain, Clock, Calendar, ArrowUp, ArrowDown, Upload, Plus } from 'lucide-react';
 import { ITradeFormData, ITradeModalProps, MarketType, TradeDirection, TradeDuration, OutcomeSummary } from '@/types';
 
@@ -31,40 +31,182 @@ const commonMistakes = [
   'No Clear Plan', 'No Mistakes'
 ];
 
-export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
+export function AddTradeModal({ isOpen, onClose, onSubmit, initialData }: ITradeModalProps) {
   const [activeTab, setActiveTab] = useState<'general' | 'psychology'>('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newRule, setNewRule] = useState('');
 
-  const [formData, setFormData] = useState<ITradeFormData>({
-    symbol: '',
-    marketType: MarketType.INDIAN,
-    entryDate: '',
-    entryPrice: 0,
-    quantity: 0,
-    totalAmount: 0,
-    exitPrice: 0,
-    direction: TradeDirection.LONG,
-    duration: TradeDuration.INTRADAY,
-    strategy: '',
-    outcomeSummary: OutcomeSummary.PROFITABLE,
-    tradeAnalysis: '',
-    rulesFollowed: [],
-    screenshots: [],
-    psychology: {
-      entryConfidence: 5,
-      satisfactionRating: 5,
-      emotionalState: '',
-      mistakesMade: [],
-      lessonsLearned: '',
-    },
-  });
+  // Initialize form data from initialData if provided (for editing)
+  const getInitialFormData = (): ITradeFormData => {
+    if (initialData) {
+      return {
+        symbol: initialData.symbol,
+        marketType: initialData.marketType,
+        entryDate: initialData.entryDate.toISOString().split('T')[0],
+        entryPrice: initialData.entryPrice,
+        quantity: initialData.quantity,
+        totalAmount: initialData.totalAmount,
+        exitPrice: initialData.exitPrice || 0,
+        direction: initialData.direction,
+        duration: TradeDuration.INTRADAY, // Default, not stored in ITrade
+        strategy: initialData.strategy,
+        outcomeSummary: initialData.outcomeSummary,
+        tradeAnalysis: initialData.tradeAnalysis,
+        rulesFollowed: initialData.rulesFollowed || [],
+        screenshots: initialData.screenshots || [],
+        psychology: initialData.psychology || {
+          entryConfidence: 0,
+          satisfactionRating: 0,
+          emotionalState: '',
+          mistakesMade: [],
+          lessonsLearned: '',
+        },
+      };
+    }
+    return {
+      symbol: '',
+      marketType: MarketType.INDIAN,
+      entryDate: '',
+      entryPrice: 0,
+      quantity: 0,
+      totalAmount: 0,
+      exitPrice: 0,
+      direction: TradeDirection.LONG,
+      duration: TradeDuration.INTRADAY,
+      strategy: '',
+      outcomeSummary: OutcomeSummary.PROFITABLE,
+      tradeAnalysis: '',
+      rulesFollowed: [],
+      screenshots: [],
+      psychology: {
+        entryConfidence: 5,
+        satisfactionRating: 5,
+        emotionalState: '',
+        mistakesMade: [],
+        lessonsLearned: '',
+      },
+    };
+  };
+
+  const [formData, setFormData] = useState<ITradeFormData>(getInitialFormData());
+
+  // Reset form when modal opens/closes or initialData changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(getInitialFormData());
+      setActiveTab('general');
+      setNewRule('');
+    }
+  }, [isOpen, initialData]);
 
   const handleInputChange = (field: string, value: string | number | TradeDirection | TradeDuration | OutcomeSummary | MarketType) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Calculate P&L based on entry price, exit price, quantity, and direction
+  const calculatePnL = (): number => {
+    if (!formData.entryPrice || !formData.exitPrice || !formData.quantity) {
+      return 0;
+    }
+    const priceDiff = formData.direction === TradeDirection.LONG
+      ? formData.exitPrice - formData.entryPrice
+      : formData.entryPrice - formData.exitPrice;
+    return Number((priceDiff * formData.quantity).toFixed(2));
+  };
+
+  // Calculate total amount based on entry price and quantity
+  const calculateTotalAmount = (): number => {
+    if (!formData.entryPrice || !formData.quantity) {
+      return 0;
+    }
+    return Number((formData.entryPrice * formData.quantity).toFixed(2));
+  };
+
+  // Format number to 2 decimal places for display (except quantity which is integer)
+  const formatNumber = (value: number | string | undefined, isInteger: boolean = false): string => {
+    if (value === undefined || value === null || value === '') {
+      return '';
+    }
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) {
+      return '';
+    }
+    return isInteger ? Math.floor(numValue).toString() : numValue.toFixed(2);
+  };
+
+  // Handle number input to prevent leading zeros
+  const handleNumberInput = (field: string, value: string) => {
+    // If empty, set to 0
+    if (value === '' || value === null || value === undefined) {
+      handleInputChange(field, 0);
+      // Auto-calculate total amount if entry price or quantity changed
+      if (field === 'entryPrice' || field === 'quantity') {
+        const entryPrice = field === 'entryPrice' ? 0 : formData.entryPrice;
+        const quantity = field === 'quantity' ? 0 : formData.quantity;
+        handleInputChange('totalAmount', Number((entryPrice * quantity).toFixed(2)));
+      }
+      return;
+    }
+    
+    // Remove leading zeros but preserve decimals
+    // Handle cases like "0341" -> "341", "0100" -> "100", "0.5" -> "0.5", "00.5" -> "0.5"
+    let cleanedValue = value.trim();
+    
+    // Remove leading zeros, but keep at least one digit before decimal point
+    // This handles: "0341" -> "341", "0100" -> "100", "00.5" -> "0.5"
+    if (cleanedValue.includes('.')) {
+      // For decimal numbers, remove leading zeros before decimal point
+      const parts = cleanedValue.split('.');
+      parts[0] = parts[0].replace(/^0+/, '') || '0';
+      cleanedValue = parts.join('.');
+    } else {
+      // For whole numbers, remove all leading zeros
+      cleanedValue = cleanedValue.replace(/^0+/, '') || '0';
+    }
+    
+    // Parse the number
+    const numValue = cleanedValue === '' ? 0 : parseFloat(cleanedValue);
+    
+    // Check if field is integer type (quantity)
+    if (field === 'quantity') {
+      const intValue = Math.floor(Math.abs(numValue)) || 0;
+      handleInputChange(field, intValue);
+      // Auto-calculate total amount when quantity changes
+      if (formData.entryPrice) {
+        handleInputChange('totalAmount', Number((formData.entryPrice * intValue).toFixed(2)));
+      }
+    } else {
+      const floatValue = isNaN(numValue) ? 0 : Number(numValue.toFixed(2));
+      handleInputChange(field, floatValue);
+      // Auto-calculate total amount when entry price changes
+      if (field === 'entryPrice' && formData.quantity) {
+        handleInputChange('totalAmount', Number((floatValue * formData.quantity).toFixed(2)));
+      }
+    }
+  };
+
+  // Handle blur event to ensure clean display
+  const handleNumberBlur = (field: string, value: number) => {
+    // Ensure the value is properly formatted (no leading zeros, 2 decimal places)
+    if (value === 0) {
+      handleInputChange(field, 0);
+    } else {
+      // Re-parse to ensure clean value with 2 decimal places
+      const numValue = field === 'quantity' 
+        ? Math.floor(value) 
+        : Number(value.toFixed(2));
+      handleInputChange(field, numValue);
+      
+      // Auto-calculate total amount if entry price or quantity changed
+      if (field === 'entryPrice' && formData.quantity) {
+        handleInputChange('totalAmount', Number((numValue * formData.quantity).toFixed(2)));
+      } else if (field === 'quantity' && formData.entryPrice) {
+        handleInputChange('totalAmount', Number((formData.entryPrice * numValue).toFixed(2)));
+      }
+    }
   };
 
   const handlePsychologyChange = (field: string, value: string | number) => {
@@ -287,8 +429,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.entryPrice}
-                    onChange={(e) => handleInputChange('entryPrice', parseFloat(e.target.value) || 0)}
+                    value={formData.entryPrice || ''}
+                    onChange={(e) => handleNumberInput('entryPrice', e.target.value)}
+                    onBlur={(e) => handleNumberBlur('entryPrice', parseFloat(e.target.value) || 0)}
                     placeholder="Entry Price"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                     required
@@ -304,11 +447,14 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   </label>
                   <input
                     type="number"
-                    value={formData.quantity}
-                    onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+                    value={formData.quantity || ''}
+                    onChange={(e) => handleNumberInput('quantity', e.target.value)}
+                    onBlur={(e) => handleNumberBlur('quantity', parseInt(e.target.value) || 0)}
                     placeholder="Quantity"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                     required
+                    min="1"
+                    step="1"
                   />
                 </div>
                 <div>
@@ -318,10 +464,10 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.totalAmount}
-                    onChange={(e) => handleInputChange('totalAmount', parseFloat(e.target.value) || 0)}
-                    placeholder="Amount"
-                    className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                    value={formatNumber(calculateTotalAmount())}
+                    readOnly
+                    placeholder="Auto-calculated"
+                    className="w-full bg-secondary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -335,8 +481,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.exitPrice}
-                    onChange={(e) => handleInputChange('exitPrice', parseFloat(e.target.value) || 0)}
+                    value={formData.exitPrice || ''}
+                    onChange={(e) => handleNumberInput('exitPrice', e.target.value)}
+                    onBlur={(e) => handleNumberBlur('exitPrice', parseFloat(e.target.value) || 0)}
                     placeholder="Exit Price"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                     required
@@ -347,12 +494,11 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                     P&L Amount
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={formData.exitPrice}
-                    onChange={(e) => handleInputChange('exitPrice', parseFloat(e.target.value) || 0)}
-                    placeholder="% Change"
-                    className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                    type="text"
+                    value={formatNumber(calculatePnL())}
+                    readOnly
+                    placeholder="Auto-calculated"
+                    className="w-full bg-secondary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -399,8 +545,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.stopLoss}
-                    onChange={(e) => handleInputChange('stopLoss', parseFloat(e.target.value) || 0)}
+                    value={formData.stopLoss || ''}
+                    onChange={(e) => handleNumberInput('stopLoss', e.target.value)}
+                    onBlur={(e) => handleNumberBlur('stopLoss', parseFloat(e.target.value) || 0)}
                     placeholder="Stop Loss"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                   />
@@ -412,8 +559,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit }: ITradeModalProps) {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.target}
-                    onChange={(e) => handleInputChange('target', parseFloat(e.target.value) || 0)}
+                    value={formData.target || ''}
+                    onChange={(e) => handleNumberInput('target', e.target.value)}
+                    onBlur={(e) => handleNumberBlur('target', parseFloat(e.target.value) || 0)}
                     placeholder="Target"
                     className="w-full bg-primary border border-primary text-primary placeholder-tertiary px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                   />

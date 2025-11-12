@@ -1,4 +1,4 @@
-enum RuleCategory {
+export enum RuleCategory {
   ENTRY = "entry",
   EXIT = "exit",
   STOP_LOSS = "stop_loss",

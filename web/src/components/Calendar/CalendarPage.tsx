@@ -14,6 +14,8 @@ import {
   Filter,
   Search
 } from 'lucide-react';
+import { ITrade, TradeDirection } from '@/types';
+import { tradeApi } from '@/services/api';
 
 interface CalendarEvent {
   id: string;
@@ -39,46 +41,129 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [trades, setTrades] = useState<ITrade[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // TODO: Get userId from authentication context
+  const userId = 1;
 
-  // Sample events for demonstration
+  // Calculate P&L for a trade
+  const calculatePnL = (trade: ITrade): number => {
+    if (!trade.entryPrice || !trade.exitPrice || !trade.quantity) {
+      return 0;
+    }
+    const priceDiff = trade.direction === TradeDirection.LONG
+      ? trade.exitPrice - trade.entryPrice
+      : trade.entryPrice - trade.exitPrice;
+    return Number((priceDiff * trade.quantity).toFixed(2));
+  };
+
+  // Fetch trades on component mount and when month changes
   useEffect(() => {
-    const sampleEvents: CalendarEvent[] = [
-      {
-        id: '1',
-        title: 'RELIANCE Trade',
-        type: 'trade',
-        date: new Date(2024, 0, 15),
-        time: '09:30',
-        pnl: 2500,
-        status: 'completed'
-      },
-      {
-        id: '2',
-        title: 'NIFTY Strategy Review',
-        type: 'strategy',
-        date: new Date(2024, 0, 18),
-        time: '14:00',
-        status: 'pending'
-      },
-      {
-        id: '3',
-        title: 'Market Analysis Meeting',
-        type: 'meeting',
-        date: new Date(2024, 0, 22),
-        time: '10:00',
-        status: 'pending'
-      },
-      {
-        id: '4',
-        title: 'Stop Loss Reminder',
-        type: 'reminder',
-        date: new Date(2024, 0, 25),
-        time: '15:30',
-        status: 'pending'
-      }
-    ];
-    setEvents(sampleEvents);
+    fetchTrades();
   }, []);
+
+  const fetchTrades = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await tradeApi.getAll(userId);
+      
+      // Transform API response to match TypeScript interface
+      const transformedTrades: ITrade[] = ((response && response.trades) || []).map((t) => ({
+        id: t.id,
+        userId: t.user_id.toString(),
+        symbol: t.symbol,
+        marketType: t.market_type as any,
+        entryDate: new Date(t.entry_date),
+        entryPrice: t.entry_price,
+        quantity: t.quantity,
+        totalAmount: t.total_amount,
+        exitPrice: t.exit_price,
+        direction: t.direction as any,
+        stopLoss: t.stop_loss,
+        target: t.target,
+        strategy: t.strategy,
+        outcomeSummary: t.outcome_summary as any,
+        tradeAnalysis: t.trade_analysis,
+        rulesFollowed: t.rules_followed,
+        screenshots: t.screenshots,
+        psychology: t.psychology ? {
+          entryConfidence: t.psychology.entry_confidence,
+          satisfactionRating: t.psychology.satisfaction_rating,
+          emotionalState: t.psychology.emotional_state,
+          mistakesMade: t.psychology.mistakes_made || [],
+          lessonsLearned: t.psychology.lessons_learned,
+        } : null,
+        // Broker-specific fields
+        tradingBroker: t.trading_broker as any,
+        traderBrokerId: t.trader_broker_id,
+        exchangeOrderId: t.exchange_order_id,
+        orderId: t.order_id,
+        productType: t.product_type as any,
+        transactionType: t.transaction_type,
+        createdAt: new Date(t.created_at),
+        updatedAt: new Date(t.updated_at),
+      }));
+      
+      setTrades(transformedTrades);
+      
+      // Convert trades to calendar events
+      const tradeEvents: CalendarEvent[] = transformedTrades.map((trade) => {
+        // Calculate P&L
+        const pnl = calculatePnL(trade);
+        
+        return {
+          id: trade.id,
+          title: `${trade.symbol} ${trade.direction.toUpperCase()}`,
+          type: 'trade' as const,
+          date: trade.entryDate,
+          time: trade.entryDate.toLocaleTimeString('en-IN', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          }),
+          description: trade.tradeAnalysis || `${trade.strategy} - ${trade.symbol}`,
+          pnl: pnl,
+          status: 'completed' as const
+        };
+      });
+      
+      setEvents(tradeEvents);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch trades");
+      console.error("Error fetching trades:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate monthly stats
+  const getMonthlyStats = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    const monthTrades = trades.filter(trade => {
+      const tradeDate = trade.entryDate;
+      return tradeDate.getFullYear() === year && tradeDate.getMonth() === month;
+    });
+
+    const totalTrades = monthTrades.length;
+    const totalPnL = monthTrades.reduce((sum, trade) => sum + calculatePnL(trade), 0);
+    const winningTrades = monthTrades.filter(trade => calculatePnL(trade) > 0).length;
+    const winRate = totalTrades > 0 ? Math.round((winningTrades / totalTrades) * 100) : 0;
+    
+    // Get unique strategies for the month
+    const uniqueStrategies = new Set(monthTrades.map(trade => trade.strategy).filter(Boolean));
+    
+    return {
+      totalTrades,
+      totalPnL,
+      winRate,
+      strategies: uniqueStrategies.size
+    };
+  };
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -200,12 +285,25 @@ export default function CalendarPage() {
     });
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(amount);
+  };
+
   const days = getDaysInMonth(currentDate);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthlyStats = getMonthlyStats();
 
   return (
     <div className="p-6">
-      
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400">
+          <p className="font-helvetica-medium">{error}</p>
+        </div>
+      )}
 
       {/* Calendar Navigation */}
       <div className="bg-primary border border-primary rounded-lg p-4 mb-6">
@@ -378,24 +476,36 @@ export default function CalendarPage() {
           {/* Quick Stats */}
           <div className="bg-primary border border-primary rounded-lg p-4">
             <h3 className="text-lg font-helvetica-bold text-primary mb-3">This Month</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-tertiary text-sm">Total Trades</span>
-                <span className="text-primary font-helvetica-medium">12</span>
+            {loading ? (
+              <div className="text-center py-4">
+                <p className="text-tertiary text-sm">Loading...</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-tertiary text-sm">P&L</span>
-                <span className="text-green-400 font-helvetica-medium">+₹15,420</span>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-tertiary text-sm">Total Trades</span>
+                  <span className="text-primary font-helvetica-medium">{monthlyStats.totalTrades}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-tertiary text-sm">P&L</span>
+                  <span className={`font-helvetica-medium ${
+                    monthlyStats.totalPnL > 0 ? 'text-green-400' : 
+                    monthlyStats.totalPnL < 0 ? 'text-red-400' : 
+                    'text-primary'
+                  }`}>
+                    {monthlyStats.totalPnL > 0 ? '+' : ''}{formatCurrency(monthlyStats.totalPnL)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-tertiary text-sm">Win Rate</span>
+                  <span className="text-primary font-helvetica-medium">{monthlyStats.winRate}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-tertiary text-sm">Strategies</span>
+                  <span className="text-primary font-helvetica-medium">{monthlyStats.strategies}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-tertiary text-sm">Win Rate</span>
-                <span className="text-primary font-helvetica-medium">75%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-tertiary text-sm">Strategies</span>
-                <span className="text-primary font-helvetica-medium">3</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Event Types Legend */}
@@ -404,9 +514,6 @@ export default function CalendarPage() {
             <div className="space-y-2">
               {[
                 { type: 'trade', label: 'Trades', icon: TrendingUp },
-                { type: 'strategy', label: 'Strategies', icon: Target },
-                { type: 'meeting', label: 'Meetings', icon: BarChart3 },
-                { type: 'reminder', label: 'Reminders', icon: CalendarIcon },
               ].map(({ type, label, icon: Icon }) => (
                 <div key={type} className="flex items-center gap-2">
                   <div className={`p-1 rounded ${getEventTypeColor(type)}`}>

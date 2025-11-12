@@ -1,0 +1,12 @@
+{
+  "tradingBroker": "zerodha", // zerodha | dhan
+  "traderBrokerId": "r44f45g4g4g4g45g",
+  "quantity": 10,
+  "price": 45.56,
+  "symbol": "AAPL",
+  "transactionType": "buy", // buy | sell
+  "exchangeOrderId": "f4f43f434",
+  "orderId": "f4f43f434",
+  "exchangeTime": "2025-01-01 12:00:00",
+  "productType": "CNC" // CNC | MIS | NRML | INTRADAY | OTC
+}

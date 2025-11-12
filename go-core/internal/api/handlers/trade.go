@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"go-core/internal/api/dto"
 	"go-core/internal/data"
 	"go-core/internal/data/repos"
+	"go-core/internal/services/brokers"
 	"go-core/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -256,19 +259,61 @@ func UpdateTrade(db *data.DB) gin.HandlerFunc {
 			UpdatedAt:      time.Now(),
 		}
 
-		// Add psychology if provided
-		if req.Psychology != nil {
-			trade.Psychology = &data.TradePsychology{
-				EntryConfidence:    req.Psychology.EntryConfidence,
-				SatisfactionRating: req.Psychology.SatisfactionRating,
-				EmotionalState:     req.Psychology.EmotionalState,
-				MistakesMade:       req.Psychology.MistakesMade,
-				LessonsLearned:     req.Psychology.LessonsLearned,
-			}
-		}
-
 		// Update trade in database
 		repo := repos.NewTradeRepository(db.GetConnection())
+
+		// Get existing trade to preserve psychology fields that aren't being updated
+		existingTrade, err := repo.GetTradeByID(tradeID, req.UserID)
+		if err != nil {
+			utils.LogError(err, "Failed to get existing trade for update", map[string]interface{}{
+				"trade_id": tradeID,
+			})
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Not Found",
+				Message: "Trade not found",
+				Code:    http.StatusNotFound,
+			})
+			return
+		}
+
+		// Handle psychology update - merge with existing if provided
+		if req.Psychology != nil {
+			// Start with existing psychology or create new
+			var psychology *data.TradePsychology
+			if existingTrade.Psychology != nil {
+				psychology = &data.TradePsychology{
+					EntryConfidence:    existingTrade.Psychology.EntryConfidence,
+					SatisfactionRating: existingTrade.Psychology.SatisfactionRating,
+					EmotionalState:     existingTrade.Psychology.EmotionalState,
+					MistakesMade:       existingTrade.Psychology.MistakesMade,
+					LessonsLearned:     existingTrade.Psychology.LessonsLearned,
+				}
+			} else {
+				psychology = &data.TradePsychology{}
+			}
+
+			// Update only fields that are provided (non-nil)
+			if req.Psychology.EntryConfidence != nil {
+				psychology.EntryConfidence = *req.Psychology.EntryConfidence
+			}
+			if req.Psychology.SatisfactionRating != nil {
+				psychology.SatisfactionRating = *req.Psychology.SatisfactionRating
+			}
+			if req.Psychology.EmotionalState != nil {
+				psychology.EmotionalState = *req.Psychology.EmotionalState
+			}
+			if req.Psychology.MistakesMade != nil {
+				psychology.MistakesMade = req.Psychology.MistakesMade
+			}
+			if req.Psychology.LessonsLearned != nil {
+				psychology.LessonsLearned = req.Psychology.LessonsLearned
+			}
+
+			trade.Psychology = psychology
+		} else if existingTrade.Psychology != nil {
+			// Keep existing psychology if not provided in update
+			trade.Psychology = existingTrade.Psychology
+		}
 		if err := repo.UpdateTrade(trade); err != nil {
 			utils.LogError(err, "Failed to update trade", map[string]interface{}{
 				"trade_id": tradeID,
@@ -541,4 +586,259 @@ func convertTradeToResponse(trade *data.Trade) dto.TradeResponse {
 	}
 
 	return response
+}
+
+// SyncDhanTrades syncs trades from Dhan broker for a user
+// @Summary Sync Dhan trades
+// @Description Fetches all trades from Dhan API since Jan 2022 and saves new trades to the database
+// @Tags trades
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} dto.SuccessResponse "Trades synced successfully"
+// @Failure 400 {object} dto.ErrorResponse "Bad request"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/v1/users/{id}/trades/sync-dhan [post]
+func SyncDhanTrades(db *data.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userIDStr := c.Param("id")
+		userID, err := strconv.Atoi(userIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Error:   "Invalid Request",
+				Message: "Invalid user ID",
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
+
+		// Get user's Dhan broker configuration
+		userRepo := repos.NewUserRepository(db.GetConnection())
+		user, err := userRepo.GetUserByID(userIDStr)
+		if err != nil {
+			utils.LogError(err, "Failed to get user for sync")
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Internal Server Error",
+				Message: "Failed to get user",
+				Code:    http.StatusInternalServerError,
+			})
+			return
+		}
+
+		config, exists := user.ConfiguredBrokers["dhan"]
+		if !exists || config.AccessToken == "" {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Error:   "Bad Request",
+				Message: "Dhan broker not configured or access token missing. Please configure Dhan first.",
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
+
+		// Get the latest trade date for this user from Dhan broker
+		tradeRepo := repos.NewTradeRepository(db.GetConnection())
+		latestTradeDate, err := tradeRepo.GetLatestTradeDateByBroker(userID, data.TradingBrokerDhan)
+		if err != nil {
+			utils.LogError(err, "Failed to get latest trade date")
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Internal Server Error",
+				Message: "Failed to get latest trade date",
+				Code:    http.StatusInternalServerError,
+			})
+			return
+		}
+
+		// Determine start date: use latest trade date if exists, otherwise start from Jan 1, 1999
+		var fromDate time.Time
+		if latestTradeDate != nil {
+			// Start from the day after the latest trade date to avoid duplicates
+			fromDate = latestTradeDate.AddDate(0, 0, 1)
+		} else {
+			// First sync: start from Jan 1, 1999 to get all historical trades
+			fromDate = time.Date(1999, time.January, 1, 0, 0, 0, 0, time.UTC)
+		}
+
+		// End date: current date
+		toDate := time.Now().UTC()
+
+		// Format dates for API
+		fromDateStr := brokers.FormatDateForAPI(fromDate)
+		toDateStr := brokers.FormatDateForAPI(toDate)
+
+		// Check if token is expired
+		if config.ExpiryTime != nil && config.ExpiryTime.Before(time.Now()) {
+			utils.LogError(nil, "Dhan access token expired", map[string]interface{}{
+				"user_id":     userID,
+				"expiry_time": config.ExpiryTime,
+			})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Error:   "Bad Request",
+				Message: "Dhan access token has expired. Please renew the token from the Accounts page.",
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
+
+		utils.LogInfo("Starting Dhan trade sync", map[string]interface{}{
+			"user_id":           userID,
+			"from_date":         fromDateStr,
+			"to_date":           toDateStr,
+			"from_date_iso":     fromDate.Format(time.RFC3339),
+			"to_date_iso":       toDate.Format(time.RFC3339),
+			"has_token":         config.AccessToken != "",
+			"token_length":      len(config.AccessToken),
+			"expiry_time":       config.ExpiryTime,
+			"latest_trade_date": latestTradeDate,
+		})
+
+		// Fetch trades from Dhan API
+		dhanService := brokers.NewDhanService()
+		trades, err := dhanService.FetchAndConvertTrades(config.AccessToken, fromDateStr, toDateStr, userID)
+
+		// If we get an "Invalid Token" error, try to auto-renew the token
+		if err != nil && strings.Contains(err.Error(), "Invalid Token") {
+			utils.LogInfo("Token invalid, attempting auto-renewal", map[string]interface{}{
+				"user_id": userID,
+			})
+
+			// Try to renew the token automatically
+			if config.DhanClientID != nil && *config.DhanClientID != "" {
+				renewResponse, renewErr := dhanService.RenewToken(config.AccessToken, *config.DhanClientID)
+				if renewErr != nil {
+					utils.LogError(renewErr, "Failed to auto-renew token", map[string]interface{}{
+						"user_id": userID,
+					})
+				} else {
+					// Parse expiry time
+					expiryTime, parseErr := time.Parse("2006-01-02T15:04:05", renewResponse.ExpiryTime)
+					if parseErr != nil {
+						expiryTime = time.Now().Add(24 * time.Hour)
+					}
+
+					// Update config with new token
+					config.AccessToken = renewResponse.AccessToken
+					config.ExpiryTime = &expiryTime
+					config.ConfiguredAt = time.Now()
+					user.ConfiguredBrokers["dhan"] = config
+
+					// Save updated config
+					if updateErr := userRepo.UpdateUser(user); updateErr != nil {
+						utils.LogError(updateErr, "Failed to save renewed token", map[string]interface{}{
+							"user_id": userID,
+						})
+					} else {
+						utils.LogInfo("Token auto-renewed successfully", map[string]interface{}{
+							"user_id": userID,
+						})
+
+						// Retry fetching trades with new token
+						trades, err = dhanService.FetchAndConvertTrades(config.AccessToken, fromDateStr, toDateStr, userID)
+						if err == nil {
+							utils.LogInfo("Successfully fetched trades after token renewal", map[string]interface{}{
+								"user_id": userID,
+								"count":   len(trades),
+							})
+						} else {
+							utils.LogError(err, "Failed to fetch trades after token renewal", map[string]interface{}{
+								"user_id": userID,
+							})
+						}
+					}
+				}
+			} else {
+				utils.LogError(nil, "Cannot auto-renew token: Dhan Client ID missing", map[string]interface{}{
+					"user_id": userID,
+				})
+			}
+		}
+
+		if err != nil {
+			utils.LogError(err, "Failed to fetch trades from Dhan")
+			errorMsg := err.Error()
+			if strings.Contains(errorMsg, "Invalid Token") {
+				c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+					Error:   "Unauthorized",
+					Message: "Dhan access token is invalid or expired. Please renew the token from the Accounts page.",
+					Code:    http.StatusUnauthorized,
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+					Error:   "Internal Server Error",
+					Message: "Failed to fetch trades from Dhan: " + errorMsg,
+					Code:    http.StatusInternalServerError,
+				})
+			}
+			return
+		}
+
+		utils.LogInfo("Fetched trades from Dhan", map[string]interface{}{
+			"user_id": userID,
+			"count":   len(trades),
+		})
+
+		// Save trades that don't already exist
+		savedCount := 0
+		skippedCount := 0
+		errorCount := 0
+
+		for _, trade := range trades {
+			// Check if trade already exists by broker ID
+			exchangeOrderID := ""
+			orderID := ""
+			if trade.ExchangeOrderID != nil {
+				exchangeOrderID = *trade.ExchangeOrderID
+			}
+			if trade.OrderID != nil {
+				orderID = *trade.OrderID
+			}
+
+			exists, err := tradeRepo.TradeExistsByBrokerID(userID, data.TradingBrokerDhan, exchangeOrderID, orderID)
+			if err != nil {
+				utils.LogError(err, "Failed to check if trade exists", map[string]interface{}{
+					"exchange_order_id": exchangeOrderID,
+					"order_id":          orderID,
+				})
+				errorCount++
+				continue
+			}
+
+			if exists {
+				skippedCount++
+				continue
+			}
+
+			// Save new trade
+			if err := tradeRepo.CreateTrade(trade); err != nil {
+				utils.LogError(err, "Failed to save trade", map[string]interface{}{
+					"exchange_order_id": exchangeOrderID,
+					"order_id":          orderID,
+				})
+				errorCount++
+				continue
+			}
+
+			savedCount++
+		}
+
+		utils.LogInfo("Completed Dhan trade sync", map[string]interface{}{
+			"user_id":       userID,
+			"saved_count":   savedCount,
+			"skipped_count": skippedCount,
+			"error_count":   errorCount,
+			"total_fetched": len(trades),
+		})
+
+		c.JSON(http.StatusOK, dto.SuccessResponse{
+			Message: fmt.Sprintf("Sync completed. Saved %d new trades, skipped %d existing trades", savedCount, skippedCount),
+			Data: map[string]interface{}{
+				"saved_count":   savedCount,
+				"skipped_count": skippedCount,
+				"error_count":   errorCount,
+				"total_fetched": len(trades),
+				"from_date":     fromDateStr,
+				"to_date":       toDateStr,
+				"date_range":    fmt.Sprintf("%s to %s", fromDateStr, toDateStr),
+			},
+		})
+	}
 }
