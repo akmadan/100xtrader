@@ -84,7 +84,7 @@ services:
     ports:
       - "${backendPort}:8080"
     environment:
-      - DB_PATH=/app/data/temp_db.sqlite
+      - DB_PATH=/app/data/db.sqlite
       - PORT=8080
     volumes:
       - backend-data:/app/data
