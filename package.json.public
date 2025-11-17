@@ -1,7 +1,7 @@
 {
   "name": "100xtrader",
   "version": "1.0.0",
-  "description": "A comprehensive trading journal platform - Run without cloning!",
+  "description": "Open Source Algo Trading & Journaling Platform",
   "bin": {
     "100xtrader": "bin/100xtrader.js"
   },
@@ -19,13 +19,15 @@
     "algorithmic-trading",
     "trading-platform",
     "docker",
-    "npx"
+    "npx",
+    "go",
+    "nextjs"
   ],
-  "author": "Your Name",
+  "author": "Akshit Madan",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/100xtrader.git"
+    "url": "https://github.com/akmadan/100xtrader.git"
   },
   "engines": {
     "node": ">=18.0.0"

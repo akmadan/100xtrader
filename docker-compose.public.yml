@@ -5,7 +5,7 @@ version: '3.8'
 
 services:
   backend:
-    image: 100xtrader/backend:latest  # Replace with your Docker Hub username
+    image: akshitmadan/100xtrader-backend:latest  
     container_name: 100xtrader-backend
     ports:
       - "8080:8080"
@@ -23,7 +23,7 @@ services:
       start_period: 10s
 
   frontend:
-    image: 100xtrader/frontend:latest  # Replace with your Docker Hub username
+    image: akshitmadan/100xtrader-frontend:latest  
     container_name: 100xtrader-frontend
     ports:
       - "3000:3000"

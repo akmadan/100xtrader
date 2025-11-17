@@ -13,7 +13,7 @@ Run 100xTrader instantly without cloning the repository:
 npx 100xtrader
 
 # Or using Docker directly
-curl -o docker-compose.yml https://raw.githubusercontent.com/yourusername/100xtrader/main/docker-compose.public.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/akmadan/100xtrader/main/docker-compose.public.yml
 docker-compose up -d
 ```
 
