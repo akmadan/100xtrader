@@ -64,27 +64,27 @@ export function AddTradeModal({ isOpen, onClose, onSubmit, initialData }: ITrade
       };
     }
     return {
-      symbol: '',
-      marketType: MarketType.INDIAN,
-      entryDate: '',
-      entryPrice: 0,
-      quantity: 0,
-      totalAmount: 0,
-      exitPrice: 0,
-      direction: TradeDirection.LONG,
-      duration: TradeDuration.INTRADAY,
-      strategy: '',
-      outcomeSummary: OutcomeSummary.PROFITABLE,
-      tradeAnalysis: '',
-      rulesFollowed: [],
-      screenshots: [],
-      psychology: {
-        entryConfidence: 5,
-        satisfactionRating: 5,
-        emotionalState: '',
-        mistakesMade: [],
-        lessonsLearned: '',
-      },
+    symbol: '',
+    marketType: MarketType.INDIAN,
+    entryDate: '',
+    entryPrice: 0,
+    quantity: 0,
+    totalAmount: 0,
+    exitPrice: 0,
+    direction: TradeDirection.LONG,
+    duration: TradeDuration.INTRADAY,
+    strategy: '',
+    outcomeSummary: OutcomeSummary.PROFITABLE,
+    tradeAnalysis: '',
+    rulesFollowed: [],
+    screenshots: [],
+    psychology: {
+      entryConfidence: 5,
+      satisfactionRating: 5,
+      emotionalState: '',
+      mistakesMade: [],
+      lessonsLearned: '',
+    },
     };
   };
 
