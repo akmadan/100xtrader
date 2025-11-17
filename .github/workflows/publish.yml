@@ -91,11 +91,13 @@ jobs:
           # Update version in package.json
           cd dist-package
           npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          
+          # Fix any package.json issues
+          npm pkg fix
       
       - name: Publish to npm
-        uses: JS-DevTools/npm-publish@v4
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          package: './dist-package/package.json'
-          access: public
+        working-directory: ./dist-package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A comprehensive trading journal platform - Run without cloning!",
   "bin": {
-    "100xtrader": "./bin/100xtrader.js"
+    "100xtrader": "bin/100xtrader.js"
   },
   "files": [
     "bin/100xtrader.js",
