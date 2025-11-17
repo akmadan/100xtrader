@@ -18,6 +18,32 @@ const os = require('os');
 const DEFAULT_FRONTEND_PORT = 3000;
 const DEFAULT_BACKEND_PORT = 8080;
 
+// ASCII Art Banner
+function showBanner(frontendPort, backendPort) {
+  const banner = `
+   /$$    /$$$$$$   /$$$$$$              /$$                              /$$                    
+ /$$$$   /$$$_  $$ /$$$_  $$            | $$                             | $$                    
+|_  $$  | $$$$\ $$| $$$$\ $$ /$$   /$$ /$$$$$$    /$$$$$$  /$$$$$$   /$$$$$$$  /$$$$$$   /$$$$$$ 
+  | $$  | $$ $$ $$| $$ $$ $$|  $$ /$$/|_  $$_/   /$$__  $$|____  $$ /$$__  $$ /$$__  $$ /$$__  $$
+  | $$  | $$\ $$$$| $$\ $$$$ \  $$$$/   | $$    | $$  \__/ /$$$$$$$| $$  | $$| $$$$$$$$| $$  \__/
+  | $$  | $$ \ $$$| $$ \ $$$  >$$  $$   | $$ /$$| $$      /$$__  $$| $$  | $$| $$_____/| $$      
+ /$$$$$$|  $$$$$$/|  $$$$$$/ /$$/\  $$  |  $$$$/| $$     |  $$$$$$$|  $$$$$$$|  $$$$$$$| $$      
+|______/ \______/  \______/ |__/  \__/   \___/  |__/      \_______/ \_______/ \_______/|__/      
+                                                                                                 
+                                                                                                 
+                                                                                                 
+
+   🚀 100xTrader is running successfully!
+
+   📊 Frontend:  http://localhost:${frontendPort}
+   🔧 Backend:   http://localhost:${backendPort}
+   📖 API Docs:  http://localhost:${backendPort}/swagger/index.html
+
+   Press Ctrl+C to stop
+`;
+  console.log(banner);
+}
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 const help = args.includes('--help') || args.includes('-h');
@@ -75,11 +101,9 @@ if (useDocker) {
       }
 
       const composeFile = path.join(tempDir, 'docker-compose.yml');
-      const composeContent = `version: '3.8'
-
-services:
+      const composeContent = `services:
   backend:
-    image: 100xtrader/backend:latest
+    image: akshitmadan/100xtrader-backend:latest
     container_name: 100xtrader-backend
     ports:
       - "${backendPort}:8080"
@@ -94,9 +118,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
 
   frontend:
-    image: 100xtrader/frontend:latest
+    image: akshitmadan/100xtrader-frontend:latest
     container_name: 100xtrader-frontend
     ports:
       - "${port}:3000"
@@ -106,6 +131,12 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
   backend-data:
@@ -128,8 +159,54 @@ volumes:
 
         console.log('\n✅ Starting containers...\n');
         const up = spawn('docker-compose', ['-f', composeFile, 'up'], {
-          stdio: 'inherit',
+          stdio: 'pipe',
           cwd: tempDir
+        });
+
+        let outputBuffer = '';
+        let bannerShown = false;
+        let backendHealthy = false;
+        let frontendHealthy = false;
+        
+        // Fallback: Show banner after 10 seconds if not shown yet
+        const fallbackTimer = setTimeout(() => {
+          if (!bannerShown) {
+            bannerShown = true;
+            showBanner(port, backendPort);
+          }
+        }, 10000);
+        
+        up.stdout.on('data', (data) => {
+          const output = data.toString();
+          outputBuffer += output;
+          process.stdout.write(output);
+          
+          // Check for backend health (multiple patterns)
+          if (output.includes('100xtrader-backend') && 
+              (output.includes('healthy') || output.includes('Started') || 
+               output.includes('ready') || output.includes('listening'))) {
+            backendHealthy = true;
+          }
+          
+          // Check for frontend health (multiple patterns)
+          if (output.includes('100xtrader-frontend') && 
+              (output.includes('healthy') || output.includes('Started') || 
+               output.includes('ready') || output.includes('compiled'))) {
+            frontendHealthy = true;
+          }
+          
+          // Show banner once both are healthy
+          if (!bannerShown && backendHealthy && frontendHealthy) {
+            clearTimeout(fallbackTimer);
+            bannerShown = true;
+            setTimeout(() => {
+              showBanner(port, backendPort);
+            }, 1000);
+          }
+        });
+
+        up.stderr.on('data', (data) => {
+          process.stderr.write(data);
         });
 
         up.on('close', (code) => {

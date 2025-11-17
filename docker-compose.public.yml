@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Public Docker Compose file for pulling pre-built images
 # Usage: docker-compose -f docker-compose.public.yml up -d
 
