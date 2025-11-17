@@ -1,4 +1,4 @@
-// @title 100xTrader API
+// @title 100xtrader API
 // @version 1.0
 // @description A comprehensive trading journal API for tracking trades, setups, and market analysis
 // @termsOfService http://swagger.io/terms/
@@ -141,6 +141,21 @@ func (s *Server) setupRoutes() {
 			rules.GET("", handlers.ListRules(s.db))                                           // List rules
 			rules.GET("/user/:user_id", handlers.GetRulesByUser(s.db))                        // Get user's rules
 			rules.GET("/user/:user_id/category/:category", handlers.GetRulesByCategory(s.db)) // Get user's rules by category
+		}
+
+		// Algorithm routes
+		algorithms := v1.Group("/algorithms")
+		{
+			algorithms.POST("", handlers.CreateAlgorithm(s.db))
+			algorithms.GET("/:id", handlers.GetAlgorithm(s.db))
+			algorithms.PUT("/:id", handlers.UpdateAlgorithm(s.db))
+			algorithms.DELETE("/:id", handlers.DeleteAlgorithm(s.db))
+		}
+
+		// User-specific algorithm routes
+		userAlgorithms := v1.Group("/users/:user_id/algorithms")
+		{
+			userAlgorithms.GET("", handlers.GetAlgorithmsByUser(s.db))
 		}
 
 		// Mistake routes

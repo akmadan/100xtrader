@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Dependencies
+node_modules/
+go-core/vendor/
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
+
+# Database files (will be created in container)
+*.sqlite
+*.sqlite3
+*.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test files
+*_test.go
+test/
+__tests__/
+
+# Scripts (not needed in container)
+scripts/
+

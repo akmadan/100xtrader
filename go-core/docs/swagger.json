@@ -5,7 +5,7 @@
     "swagger": "2.0",
     "info": {
         "description": "A comprehensive trading journal API for tracking trades, setups, and market analysis",
-        "title": "100xTrader API",
+        "title": "100xtrader API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",

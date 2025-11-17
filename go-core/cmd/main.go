@@ -1,4 +1,4 @@
-// @title 100xTrader API
+// @title 100xtrader API
 // @version 1.0
 // @description A comprehensive trading journal API for tracking trades, setups, and market analysis
 // @termsOfService http://swagger.io/terms/
@@ -31,16 +31,18 @@ func main() {
 	// Initialize logger
 	utils.InitLogger()
 
-	// Get the current working directory
-	wd, err := os.Getwd()
-	if err != nil {
-		utils.LogFatal("Failed to get working directory", map[string]interface{}{
-			"error": err.Error(),
-		})
+	// Set up database path - use environment variable or default
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		// Get the current working directory
+		wd, err := os.Getwd()
+		if err != nil {
+			utils.LogFatal("Failed to get working directory", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		dbPath = filepath.Join(wd, "..", "db.sqlite")
 	}
-
-	// Set up database path
-	dbPath := filepath.Join(wd, "..", "temp_db.sqlite")
 
 	utils.LogInfo("Initializing database", map[string]interface{}{
 		"path": dbPath,

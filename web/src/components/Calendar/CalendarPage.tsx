@@ -334,7 +334,7 @@ export default function CalendarPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={goToToday}
-              className="bg-accent hover:bg-primary text-primary font-helvetica-medium px-3 py-2 rounded-lg transition-colors duration-200"
+              className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium px-3 py-2 rounded-lg transition-colors duration-200"
             >
               Today
             </button>
@@ -346,7 +346,7 @@ export default function CalendarPage() {
                   onClick={() => setViewMode(mode)}
                   className={`px-3 py-1 rounded text-sm font-helvetica-medium transition-colors duration-200 ${
                     viewMode === mode
-                      ? 'bg-accent text-primary'
+                      ? 'bg-accent text-inverse'
                       : 'text-tertiary hover:text-primary'
                   }`}
                 >
@@ -400,7 +400,7 @@ export default function CalendarPage() {
                       {day.date.getDate()}
                     </span>
                     {day.events.length > 0 && (
-                      <span className="text-xs bg-accent text-primary px-1.5 py-0.5 rounded-full">
+                      <span className="text-xs bg-accent text-inverse px-1.5 py-0.5 rounded-full">
                         {day.events.length}
                       </span>
                     )}

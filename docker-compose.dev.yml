@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: 100xtrader-backend-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_PATH=/app/data/temp_db.sqlite
+      - PORT=8080
+    volumes:
+      - ./go-core:/app:ro
+      - ./go-core/migrations:/app/migrations:ro
+      - backend-data:/app/data
+    command: go run cmd/main.go
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.dev
+    container_name: 100xtrader-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+

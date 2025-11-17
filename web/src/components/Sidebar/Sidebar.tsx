@@ -80,24 +80,24 @@ export default function Sidebar({
         { id: "Trades", label: "Trades", icon: FolderOpen, count: null },
         { id: "Configure", label: "Configure", icon: Settings, count: null },
         { id: "Calendar", label: "Calendar", icon: Calendar, count: null },
-        { id: "Reports", label: "Reports", icon: BarChart3, count: null },
-        { id: "Mentor Mode", label: "Mentor Mode", icon: User, count: null },
-        { id: "Knowledge", label: "Knowledge", icon: Brain, count: null },
+        // { id: "Reports", label: "Reports", icon: BarChart3, count: null },
+        // { id: "Mentor Mode", label: "Mentor Mode", icon: User, count: null },
+        // { id: "Knowledge", label: "Knowledge", icon: Brain, count: null },
       ],
     },
-    {
-      id: "intelligence",
-      title: "Intelligence",
-      icon: Cpu,
-      items: [
-        { id: "Agents", label: "Agents", icon: Bot, count: null },
-        { id: "Algorithms", label: "Algorithms", icon: Cpu, count: null },
-      ],
-    },
+    // {
+    //   id: "intelligence",
+    //   title: "Intelligence",
+    //   icon: Cpu,
+    //   items: [
+    //     { id: "Agents", label: "Agents", icon: Bot, count: null },
+    //     { id: "Algorithms", label: "Algorithms", icon: Cpu, count: null },
+    //   ],
+    // },
   ];
 
   const standaloneItems = [
-    { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, count: null },
+    // { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard, count: null },
 
     { id: "Accounts", label: "Accounts", icon: CreditCard, count: null },
   ];
@@ -129,11 +129,11 @@ export default function Sidebar({
           </div>
 
           {/* Add Trade Button */}
-          <div className="p-4">
-            <button className="w-full bg-secondary hover:bg-accent text-primary font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200">
+          {/* <div className="p-4">
+            <button className="w-full bg-secondary hover:bg-accent text-inverse font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200">
               + Add Trade
             </button>
-          </div>
+          </div> */}
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-2 sidebar-scroll overflow-y-auto">
@@ -161,7 +161,7 @@ export default function Sidebar({
                         <span className="font-helvetica">{item.label}</span>
                       </div>
                       {item.count && (
-                        <span className="text-xs bg-accent text-primary px-2 py-1 rounded">
+                        <span className="text-xs bg-accent text-inverse px-2 py-1 rounded">
                           {item.count}
                         </span>
                       )}
@@ -223,7 +223,7 @@ export default function Sidebar({
                                   </span>
                                 </div>
                                 {item.count && (
-                                  <span className="text-xs bg-accent text-primary px-2 py-1 rounded">
+                                  <span className="text-xs bg-accent text-inverse px-2 py-1 rounded">
                                     {item.count}
                                   </span>
                                 )}
@@ -240,7 +240,7 @@ export default function Sidebar({
           </nav>
 
           {/* Theme Toggle */}
-          <div className="p-4 border-t border-primary">
+          {/* <div className="p-4 border-t border-primary">
             <button
               onClick={toggleTheme}
               className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-secondary hover:bg-tertiary text-primary transition-colors duration-200"
@@ -257,22 +257,18 @@ export default function Sidebar({
                 </>
               )}
             </button>
-          </div>
+          </div> */}
 
           {/* User Profile */}
           <div className="p-4 border-t border-primary">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                <span className="text-primary font-helvetica-bold text-sm">
-                  UA
-                </span>
-              </div>
+              
               <div className="flex-1 min-w-0">
                 <p className="text-primary font-helvetica-medium text-sm truncate">
-                  Umar Ashraf
+                  Akshit Madan
                 </p>
                 <p className="text-tertiary font-helvetica text-xs truncate">
-                  umarashraf0128@gmail.com
+                  akshit@gmail.com
                 </p>
               </div>
             </div>

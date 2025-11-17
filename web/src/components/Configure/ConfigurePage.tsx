@@ -75,7 +75,7 @@ function AddStrategyModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onCl
             <button
               type="submit"
               disabled={isSubmitting || !formData.name.trim() || !formData.description.trim()}
-              className="w-full bg-accent hover:bg-secondary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full bg-accent hover:bg-accent-hover disabled:bg-tertiary disabled:cursor-not-allowed text-inverse font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {isSubmitting ? "Adding Strategy..." : "Add Strategy"}
             </button>
@@ -177,7 +177,7 @@ function AddRuleModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClose:
             <button
               type="submit"
               disabled={isSubmitting || !formData.name.trim() || !formData.description.trim()}
-              className="w-full bg-accent hover:bg-secondary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full bg-accent hover:bg-accent-hover disabled:bg-tertiary disabled:cursor-not-allowed text-inverse font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {isSubmitting ? "Adding Rule..." : "Add Rule"}
             </button>
@@ -262,7 +262,7 @@ function AddMistakeModal({ isOpen, onClose, onSubmit }: { isOpen: boolean; onClo
             <button
               type="submit"
               disabled={isSubmitting || !formData.name.trim()}
-              className="w-full bg-accent hover:bg-secondary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full bg-accent hover:bg-accent-hover disabled:bg-tertiary disabled:cursor-not-allowed text-inverse font-helvetica-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {isSubmitting ? "Adding Mistake..." : "Add Mistake"}
             </button>
@@ -450,7 +450,7 @@ export default function ConfigurePage() {
                 <p className="text-tertiary font-helvetica mb-4">Create your first trading strategy to get started</p>
                 <button
                   onClick={() => setIsStrategyModalOpen(true)}
-                  className="bg-accent hover:bg-secondary text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                  className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   Add Your First Strategy
                 </button>
@@ -514,7 +514,7 @@ export default function ConfigurePage() {
                 <p className="text-tertiary font-helvetica mb-4">Create your first trading rule to get started</p>
                 <button
                   onClick={() => setIsRuleModalOpen(true)}
-                  className="bg-accent hover:bg-secondary text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                  className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   Add Your First Rule
                 </button>
@@ -549,7 +549,7 @@ export default function ConfigurePage() {
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
+                            <span className="inline-block bg-accent text-inverse text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
                               {rule.category.replace(/_/g, " ")}
                             </span>
                           </td>
@@ -584,7 +584,7 @@ export default function ConfigurePage() {
                 <p className="text-tertiary font-helvetica mb-4">Create your first trading mistake to get started</p>
                 <button
                   onClick={() => setIsMistakeModalOpen(true)}
-                  className="bg-accent hover:bg-secondary text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                  className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
                 >
                   Add Your First Mistake
                 </button>
@@ -613,7 +613,7 @@ export default function ConfigurePage() {
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="inline-block bg-accent text-primary text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
+                            <span className="inline-block bg-accent text-inverse text-xs px-2 py-1 rounded font-helvetica-medium capitalize">
                               {mistake.category}
                             </span>
                           </td>
@@ -690,10 +690,10 @@ export default function ConfigurePage() {
               else if (activeTab === "mistakes") setIsMistakeModalOpen(true);
             }}
             disabled={loading}
-            className="flex items-center space-x-2 bg-accent hover:bg-secondary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
+            className="flex items-center space-x-2 bg-accent hover:bg-accent-hover disabled:bg-tertiary disabled:cursor-not-allowed text-inverse font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200"
           >
-            <Plus className="w-4 h-4" />
-            <span>Add {activeTab.slice(0, -1)}</span>
+            <Plus className="w-4 h-4 text-inverse" />
+            <span className="text-inverse">Add {activeTab.slice(0, -1)}</span>
           </button>
         </div>
         {loading ? (

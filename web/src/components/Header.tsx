@@ -31,7 +31,7 @@ export default function Header() {
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
             <h1 className="text-xl font-helvetica-bold text-primary">
-              100xTrader
+              100xtrader
             </h1>
           </div>
 

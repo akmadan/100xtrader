@@ -2789,7 +2789,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "100xTrader API",
+	Title:            "100xtrader API",
 	Description:      "A comprehensive trading journal API for tracking trades, setups, and market analysis",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

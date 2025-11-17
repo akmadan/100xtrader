@@ -642,9 +642,9 @@ export function AddTradeModal({ isOpen, onClose, onSubmit, initialData }: ITrade
                   <button
                     type="button"
                     onClick={addRule}
-                    className="bg-accent hover:bg-primary text-primary px-3 py-2 rounded-lg transition-colors duration-200"
+                    className="bg-accent hover:bg-accent-hover text-inverse px-3 py-2 rounded-lg transition-colors duration-200"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-inverse" />
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -800,7 +800,7 @@ export function AddTradeModal({ isOpen, onClose, onSubmit, initialData }: ITrade
             <button
               type="submit"
               disabled={isSubmitting || !formData.symbol.trim() || !formData.strategy.trim() || !formData.outcomeSummary.trim()}
-              className="bg-accent hover:bg-primary disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="bg-accent hover:bg-accent-hover disabled:bg-tertiary disabled:cursor-not-allowed text-primary font-helvetica-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {isSubmitting ? 'Saving Trade...' : 'Save Trade'}
             </button>

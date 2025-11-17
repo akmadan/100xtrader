@@ -4,7 +4,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Layout } from "@/components";
 
 export const metadata: Metadata = {
-  title: "100xTrader - Trading Journal",
+  title: "100xtrader - Trading Journal",
   description: "A comprehensive trading journal for tracking trades, setups, and market analysis",
 };
 

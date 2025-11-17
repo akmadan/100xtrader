@@ -9,7 +9,9 @@ import {
   Calendar,
   Target,
   RefreshCw,
+  Building2,
 } from "lucide-react";
+import { TradingBroker } from "@/types";
 import { ITrade, ITradeFormData, TradeDirection } from "@/types";
 import { AddTradeModal } from "@/components/Trade/AddTradeModal";
 import { tradeApi } from "@/services/api";
@@ -64,7 +66,9 @@ export default function TradesPage() {
           lessonsLearned: t.psychology.lessons_learned,
         } : null,
         // Broker-specific fields
-        tradingBroker: t.trading_broker as any,
+        tradingBroker: t.trading_broker ? (t.trading_broker.toLowerCase() === 'dhan' ? TradingBroker.DHAN : 
+                                           t.trading_broker.toLowerCase() === 'zerodha' ? TradingBroker.ZERODHA : 
+                                           t.trading_broker as TradingBroker) : undefined,
         traderBrokerId: t.trader_broker_id,
         exchangeOrderId: t.exchange_order_id,
         orderId: t.order_id,
@@ -73,6 +77,11 @@ export default function TradesPage() {
         createdAt: new Date(t.created_at),
         updatedAt: new Date(t.updated_at),
       }));
+      
+      // Sort by entry date descending (most recent first) to ensure proper ordering
+      transformedTrades.sort((a, b) => {
+        return b.entryDate.getTime() - a.entryDate.getTime();
+      });
       
       setTrades(transformedTrades);
     } catch (err) {
@@ -299,14 +308,14 @@ export default function TradesPage() {
             disabled={syncing}
             className="bg-primary hover:bg-primary/80 border border-accent text-accent font-helvetica-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-primary ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync Dhan'}
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-accent hover:bg-primary text-primary font-helvetica-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent flex items-center gap-2"
+            className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-inverse" />
             Add Trade
           </button>
         </div>
@@ -421,7 +430,7 @@ export default function TradesPage() {
             </p>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-accent hover:bg-primary text-primary font-helvetica-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+              className="bg-accent hover:bg-accent-hover text-inverse font-helvetica-medium px-4 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
             >
               Add Your First Trade
             </button>
@@ -431,6 +440,7 @@ export default function TradesPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-primary">
+                  <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Broker</th>
                   <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Symbol</th>
                   <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Direction</th>
                   <th className="text-left py-3 px-4 text-sm font-helvetica-medium text-tertiary">Date</th>
@@ -452,6 +462,25 @@ export default function TradesPage() {
                       onClick={() => setEditingTrade(trade)}
                       className="border-b border-primary hover:bg-tertiary transition-colors duration-200 cursor-pointer"
                     >
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-center">
+                          {trade.tradingBroker === TradingBroker.DHAN ? (
+                            <img
+                              src="/brokers/dhan.jpeg"
+                              alt="Dhan"
+                              className="w-6 h-6 object-contain rounded"
+                            />
+                          ) : trade.tradingBroker === TradingBroker.ZERODHA ? (
+                            <img
+                              src="/brokers/zerodha.jpeg"
+                              alt="Zerodha"
+                              className="w-6 h-6 object-contain rounded"
+                            />
+                          ) : (
+                            <Building2 className="w-5 h-5 text-tertiary" />
+                          )}
+                        </div>
+                      </td>
                       <td className="py-3 px-4">
                         <span className="font-helvetica-bold text-primary">
                           {trade.symbol}

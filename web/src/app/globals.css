@@ -7,6 +7,7 @@
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-accent: #e2e8f0;
+  --bg-accent-hover: #cbd5e1;
   
   /* Text Colors */
   --text-primary: #0f172a;
@@ -45,11 +46,12 @@
 /* Dark Theme Colors */
 .dark {
   /* Background Colors */
-  --bg-darker: #010e0e;
-  --bg-primary: #010e0e;
-  --bg-secondary: #03634C;
-  --bg-tertiary: #014b3a;
-  --bg-accent: #2EC197;
+  --bg-darker: #030303;
+  --bg-primary: #030303;
+  --bg-secondary: #131313;
+  --bg-tertiary: #1e1e1e;
+  --bg-accent: #58FF2A;
+  --bg-accent-hover: #4DE623;
   
   /* Text Colors */
   --text-primary: #f8fafc;
@@ -92,6 +94,7 @@
   --color-background-secondary: var(--bg-secondary);
   --color-background-tertiary: var(--bg-tertiary);
   --color-background-accent: var(--bg-accent);
+  --color-background-accent-hover: var(--bg-accent-hover);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
@@ -132,6 +135,7 @@ body {
 .bg-secondary { background-color: var(--bg-secondary); }
 .bg-tertiary { background-color: var(--bg-tertiary); }
 .bg-accent { background-color: var(--bg-accent); }
+.bg-accent-hover { background-color: var(--bg-accent-hover); }
 
 .text-primary { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
@@ -150,6 +154,7 @@ body {
 /* Interactive States */
 .hover\:bg-secondary:hover { background-color: var(--bg-secondary); }
 .hover\:bg-tertiary:hover { background-color: var(--bg-tertiary); }
+.hover\:bg-accent-hover:hover { background-color: var(--bg-accent-hover); }
 .hover\:text-primary:hover { color: var(--text-primary); }
 .hover\:text-secondary:hover { color: var(--text-secondary); }
 .hover\:border-secondary:hover { border-color: var(--border-secondary); }

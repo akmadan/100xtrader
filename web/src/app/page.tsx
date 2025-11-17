@@ -2,7 +2,7 @@ export default function Home() {
   return (
     <div className="p-6">
       <div className="space-y-6">
-        <h1 className="text-3xl font-helvetica-bold text-primary">Welcome to 100xTrader</h1>
+        <h1 className="text-3xl font-helvetica-bold text-primary">Welcome to 100xtrader</h1>
         <p className="text-secondary font-helvetica">
           Your comprehensive trading journal for tracking trades, setups, and market analysis.
         </p>

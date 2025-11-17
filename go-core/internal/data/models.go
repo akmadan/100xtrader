@@ -176,3 +176,71 @@ const (
 	ProductTypeIntraday ProductType = "INTRADAY"
 	ProductTypeOTC      ProductType = "OTC"
 )
+
+// AlgorithmStatus represents the status of an algorithm
+type AlgorithmStatus string
+
+const (
+	AlgorithmStatusDraft AlgorithmStatus = "draft"
+	AlgorithmStatusLive  AlgorithmStatus = "live"
+	AlgorithmStatusPaused AlgorithmStatus = "paused"
+	AlgorithmStatusArchived AlgorithmStatus = "archived"
+)
+
+// ExecutionMode represents how the algorithm executes trades
+type ExecutionMode string
+
+const (
+	ExecutionModePaperTrading ExecutionMode = "paper_trading"
+	ExecutionModeLiveTrading  ExecutionMode = "live_trading"
+)
+
+// Timeframe represents the timeframe for algorithm execution
+type Timeframe string
+
+const (
+	Timeframe1m  Timeframe = "1m"
+	Timeframe5m  Timeframe = "5m"
+	Timeframe15m Timeframe = "15m"
+	Timeframe30m Timeframe = "30m"
+	Timeframe1h  Timeframe = "1h"
+	Timeframe4h  Timeframe = "4h"
+	Timeframe1d  Timeframe = "1d"
+	Timeframe1w  Timeframe = "1w"
+)
+
+// Algorithm represents a trading algorithm
+type Algorithm struct {
+	ID          string    `json:"id" db:"id"`
+	UserID      int       `json:"user_id" db:"user_id"`
+	Name        string    `json:"name" db:"name"`
+	Description *string   `json:"description,omitempty" db:"description"`
+	Code        string    `json:"code" db:"code"`
+	Status      AlgorithmStatus `json:"status" db:"status"`
+	
+	// Execution settings
+	Symbol        string         `json:"symbol" db:"symbol"` // Stock symbol to trade
+	Timeframe     Timeframe      `json:"timeframe" db:"timeframe"` // 1m, 5m, 15m, 1h, 1d, etc.
+	ExecutionMode ExecutionMode  `json:"execution_mode" db:"execution_mode"` // paper_trading or live_trading
+	Broker        *TradingBroker `json:"broker,omitempty" db:"broker"` // dhan, zerodha
+	Enabled       bool           `json:"enabled" db:"enabled"` // Whether algorithm is actively running
+	
+	// Configuration and state (JSON fields)
+	Config map[string]interface{} `json:"config,omitempty" db:"config"` // Algorithm-specific settings
+	State  map[string]interface{} `json:"state,omitempty" db:"state"`   // Algorithm state (persisted across runs)
+	
+	// Execution tracking
+	LastRunAt  *time.Time `json:"last_run_at,omitempty" db:"last_run_at"`
+	LastSignal *string    `json:"last_signal,omitempty" db:"last_signal"` // BUY, SELL, HOLD
+	
+	// Performance metrics
+	TotalTrades int     `json:"total_trades" db:"total_trades"`
+	WinRate     float64 `json:"win_rate" db:"win_rate"` // 0.0 to 1.0
+	TotalPnL    float64 `json:"total_pnl" db:"total_pnl"`
+	
+	// Metadata
+	Version   int       `json:"version" db:"version"` // For versioning
+	Tags      []string  `json:"tags,omitempty" db:"tags"` // For organization/categorization
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}

@@ -572,6 +572,13 @@ func convertTradeToResponse(trade *data.Trade) dto.TradeResponse {
 		Screenshots:    trade.Screenshots,
 		CreatedAt:      trade.CreatedAt,
 		UpdatedAt:      trade.UpdatedAt,
+		// Broker-specific fields
+		TradingBroker:   trade.TradingBroker,
+		TraderBrokerID:  trade.TraderBrokerID,
+		ExchangeOrderID: trade.ExchangeOrderID,
+		OrderID:         trade.OrderID,
+		ProductType:     trade.ProductType,
+		TransactionType: trade.TransactionType,
 	}
 
 	// Add psychology if present

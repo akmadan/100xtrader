@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting 100xTrader API Server"
+echo "🚀 Starting 100xtrader API Server"
 echo "=================================="
 
 # Navigate to go-core directory
