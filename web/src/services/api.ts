@@ -574,24 +574,5 @@ export const dhanApi = {
     });
     return response.data;
   },
-
-
-  consumeConsent: async (userId: number, tokenId: string) => {
-    const response = await apiRequest<{
-      message: string;
-      data: {
-        dhan_client_id: string;
-        dhan_client_name: string;
-        dhan_client_ucc: string;
-        given_power_of_attorney: boolean;
-        access_token: string;
-        expiry_time: string;
-      };
-    }>(`/users/${userId}/dhan/consume-consent`, {
-      method: 'POST',
-      body: JSON.stringify({ token_id: tokenId }),
-    });
-    return response.data;
-  },
 };
 
