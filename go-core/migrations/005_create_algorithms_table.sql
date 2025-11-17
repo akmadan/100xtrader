@@ -1,5 +1,3 @@
-BEGIN TRANSACTION;
-
 CREATE TABLE IF NOT EXISTS algorithms (
     id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
@@ -30,6 +28,4 @@ CREATE INDEX IF NOT EXISTS idx_algorithms_user_id ON algorithms(user_id);
 CREATE INDEX IF NOT EXISTS idx_algorithms_status ON algorithms(status);
 CREATE INDEX IF NOT EXISTS idx_algorithms_enabled ON algorithms(enabled);
 CREATE INDEX IF NOT EXISTS idx_algorithms_symbol ON algorithms(symbol);
-
-COMMIT;
 
