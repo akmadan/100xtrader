@@ -152,8 +152,8 @@ func (s *Server) setupRoutes() {
 			algorithms.DELETE("/:id", handlers.DeleteAlgorithm(s.db))
 		}
 
-		// User-specific algorithm routes
-		userAlgorithms := v1.Group("/users/:user_id/algorithms")
+		// User-specific algorithm routes (use :id to match other user routes)
+		userAlgorithms := v1.Group("/users/:id/algorithms")
 		{
 			userAlgorithms.GET("", handlers.GetAlgorithmsByUser(s.db))
 		}

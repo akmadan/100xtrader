@@ -146,7 +146,7 @@ func GetAlgorithm(db *data.DB) gin.HandlerFunc {
 // GetAlgorithmsByUser retrieves all algorithms for a user
 func GetAlgorithmsByUser(db *data.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIDStr := c.Param("user_id")
+		userIDStr := c.Param("id")
 		userID, err := strconv.Atoi(userIDStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -411,4 +411,3 @@ func convertAlgorithmToResponse(algo *data.Algorithm) dto.AlgorithmResponse {
 
 	return response
 }
-
