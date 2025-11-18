@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 100xTrader Setup Script
+# 100xtrader Setup Script
 # This script helps you set up the project quickly
 
 set -e
 
-echo "🚀 100xTrader Setup"
+echo "🚀 100xtrader Setup"
 echo "==================="
 echo ""
 

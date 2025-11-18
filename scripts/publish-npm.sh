@@ -4,7 +4,7 @@
 
 set -e
 
-echo "📦 Preparing npm package for 100xTrader"
+echo "📦 Preparing npm package for 100xtrader"
 echo "========================================"
 echo ""
 

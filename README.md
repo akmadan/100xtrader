@@ -1,12 +1,20 @@
-# 100xTrader
+# 100xtrader
 
-A comprehensive trading journal platform for tracking trades, analyzing performance, and automating trading strategies.
+[![npm version](https://img.shields.io/npm/v/100xtrader.svg?style=flat-square)](https://www.npmjs.com/package/100xtrader)
+[![npm downloads](https://img.shields.io/npm/dm/100xtrader.svg?style=flat-square)](https://www.npmjs.com/package/100xtrader)
+[![Docker Pulls](https://img.shields.io/docker/pulls/akshitmadan/100xtrader-backend.svg?style=flat-square)](https://hub.docker.com/r/akshitmadan/100xtrader-backend)
+[![GitHub stars](https://img.shields.io/github/stars/akmadan/100xtrader.svg?style=flat-square&label=stars)](https://github.com/akmadan/100xtrader)
+[![GitHub forks](https://img.shields.io/github/forks/akmadan/100xtrader.svg?style=flat-square)](https://github.com/akmadan/100xtrader)
+[![License](https://img.shields.io/github/license/akmadan/100xtrader.svg?style=flat-square)](https://github.com/akmadan/100xtrader/blob/main/LICENSE)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/akmadan/100xtrader/publish.yml?style=flat-square&label=build)](https://github.com/akmadan/100xtrader/actions)
+
+An Open Source algorithmic trading & journaling platform for tracking trades, analyzing performance, and automating trading strategies.
 
 ## 🚀 Quick Start
 
 ### Option 1: Run Without Cloning (Easiest!)
 
-Run 100xTrader instantly without cloning the repository:
+Run 100xtrader instantly without cloning the repository:
 
 ```bash
 # Using npx (requires npm)
@@ -35,7 +43,7 @@ If you want to contribute or customize:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/100xtrader.git
+git clone https://github.com/akmadan/100xtrader.git
 cd 100xtrader
 
 # Start everything with Docker Compose
@@ -56,7 +64,7 @@ Run our interactive setup script:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/100xtrader.git
+git clone https://github.com/akmadan/100xtrader.git
 cd 100xtrader
 
 # Run setup script
@@ -123,7 +131,7 @@ npm run docker:logs
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/100xtrader.git
+   git clone https://github.com/akmadan/100xtrader.git
    cd 100xtrader
    ```
 
@@ -353,8 +361,8 @@ go mod download
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/100xtrader/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/100xtrader/discussions)
+- **Issues**: [GitHub Issues](https://github.com/akmadan/100xtrader/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/akmadan/100xtrader/discussions)
 
 ## 🎯 Features
 
@@ -363,9 +371,7 @@ go mod download
 - ✅ Strategy Management
 - ✅ Rule & Mistake Tracking
 - ✅ Calendar View
-- ✅ Broker Integration (Dhan, Zerodha)
-- ✅ Algorithm Builder (Canvas & Code Views)
-- ✅ Automated Trading Algorithms
+- ✅ Broker Integration (Dhan)
 
 ---
 

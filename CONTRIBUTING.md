@@ -1,13 +1,13 @@
-# Contributing to 100xTrader
+# Contributing to 100xtrader
 
-Thank you for your interest in contributing to 100xTrader! 🎉
+Thank you for your interest in contributing to 100xtrader! 🎉
 
 ## Getting Started
 
 1. **Fork the repository**
 2. **Clone your fork**
    ```bash
-   git clone https://github.com/yourusername/100xtrader.git
+   git clone https://github.com/akmadan/100xtrader.git
    cd 100xtrader
    ```
 

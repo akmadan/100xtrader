@@ -7,7 +7,7 @@ set -e
 DOCKER_USERNAME="${DOCKER_USERNAME:-yourusername}"
 VERSION="${1:-latest}"
 
-echo "🐳 Building and publishing 100xTrader Docker images"
+echo "🐳 Building and publishing 100xtrader Docker images"
 echo "=================================================="
 echo "Docker Hub Username: $DOCKER_USERNAME"
 echo "Version: $VERSION"

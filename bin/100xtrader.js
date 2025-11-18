@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * 100xTrader CLI
- * Run the entire 100xTrader application without cloning the repository
+ * 100xtrader CLI
+ * Run the entire 100xtrader application without cloning the repository
  * 
  * Usage:
  *   npx 100xtrader
@@ -33,7 +33,7 @@ function showBanner(frontendPort, backendPort) {
                                                                                                  
                                                                                                  
 
-   🚀 100xTrader is running successfully!
+   🚀 100xtrader is running successfully!
 
    📊 Frontend:  http://localhost:${frontendPort}
    🔧 Backend:   http://localhost:${backendPort}
@@ -53,7 +53,7 @@ const useDocker = !args.includes('--no-docker');
 
 if (help) {
   console.log(`
-🚀 100xTrader - Trading Journal Platform
+🚀 100xtrader - Trading Journal Platform
 
 Usage:
   npx 100xtrader [options]
@@ -69,12 +69,12 @@ Examples:
   npx 100xtrader --port 3001
   npx 100xtrader --no-docker
 
-For more information, visit: https://github.com/yourusername/100xtrader
+For more information, visit: https://github.com/akmadan/100xtrader
   `);
   process.exit(0);
 }
 
-console.log('🚀 Starting 100xTrader...\n');
+console.log('🚀 Starting 100xtrader...\n');
 
 if (useDocker) {
   // Check if Docker is available
@@ -210,7 +210,7 @@ volumes:
         });
 
         up.on('close', (code) => {
-          console.log('\n👋 100xTrader stopped.');
+          console.log('\n👋 100xtrader stopped.');
         });
 
         // Handle Ctrl+C
